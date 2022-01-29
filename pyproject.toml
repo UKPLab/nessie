@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "nessie"
+version = "0.1.0"
+description = "Annotation error detection and correction for NLP datasets."
+authors = ["Jan-Christoph Klie  <git@mrklie.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+torch = "^1.10.2"
+flair = "^0.10"
+transformers = "^4.16.1"
+numpy = "^1.22.1"
+scipy = "^1.7.3"
+backoff = "^1.11.1"
+datasets = "^1.18.2"
+pandas = "^1.4.0"
+wget = "^3.2"
+pyro-ppl = "^1.8.0"
+cleanlab = "^1.0"
+lightgbm = "^3.3.2"
+diskcache = "^5.4.0"
+fasttext = "^0.9.2"
+cleantext = "^1.1.4"
+sentence-transformers = "^2.1.0"
+slurmee = "^0.1.0-rc.3"
+sklearn-crfsuite = "^0.3.6"
+seqeval = "^1.2.2"
+faiss-cpu = "^1.7.2"
+crowd-kit = "^0.0.9"
+iobes = "^1.5.1"
+suffix-tree = "^0.0.7"
+awkward = "^1.7.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+poethepoet = "^0.12.2"
+
+[tool.poe.tasks]
+force-cuda113 = "python -m pip install torch==1.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html"
+force-faiss-gpu = "python -m pip install faiss-gpu"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
