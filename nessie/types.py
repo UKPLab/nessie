@@ -1,4 +1,7 @@
-from typing import List
+from typing import List, Union
 
-StringArray = List[str]
-RaggedStringArray = List[List[str]]
+import awkward as ak
+import numpy.typing as npt
+
+StringArray = Union[List[str], npt.NDArray[str], ak.Array]
+RaggedStringArray = Union[List[List[str]], npt.NDArray[StringArray], ak.Array]

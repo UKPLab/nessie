@@ -10,6 +10,7 @@ from nessie.detectors.curriculum_spotter import CurriculumSpotter
 from nessie.detectors.datamap_confidence import DataMapConfidence
 from nessie.detectors.dropout_uncertainty import DropoutUncertainty
 from nessie.detectors.ensemble import MajorityVotingEnsemble
+from nessie.detectors.error_detector import Detector
 from nessie.detectors.irt import ItemResponseTheoryFlagger
 from nessie.detectors.knn_entropy import KnnEntropy, KnnFlagger
 from nessie.detectors.label_aggregation import LabelAggregation
@@ -24,4 +25,3 @@ from nessie.detectors.variational_principle import (
     VariationPrincipleSpan,
 )
 from nessie.detectors.weighted_discrepancy import WeightedDiscrepancy
-from nessie.detectors.error_detector import Detector

@@ -1,6 +1,12 @@
-from tests.fixtures import PATH_EXAMPLE_DATA_TEXT, PATH_EXAMPLE_DATA_TOKEN, PATH_EXAMPLE_DATA_SPAN
-
-from nessie.dataloader import load_text_classification_tsv, load_sequence_labeling_dataset
+from nessie.dataloader import (
+    load_sequence_labeling_dataset,
+    load_text_classification_tsv,
+)
+from tests.fixtures import (
+    PATH_EXAMPLE_DATA_SPAN,
+    PATH_EXAMPLE_DATA_TEXT,
+    PATH_EXAMPLE_DATA_TOKEN,
+)
 
 
 def test_loading_text_classification_dataset():
@@ -22,4 +28,3 @@ def test_loading_span_labeling_dataset():
 
     assert len(ds.sentences) == len(ds.gold_labels) == len(ds.noisy_labels)
     assert len(ds.sentences) == 701
-

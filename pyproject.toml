@@ -34,10 +34,15 @@ awkward = "^1.7.0"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
 poethepoet = "^0.12.2"
+black = "^22.1.0"
+isort = "^5.10.1"
 
 [tool.poe.tasks]
 force-cuda113 = "python -m pip install torch==1.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html"
 force-faiss-gpu = "python -m pip install faiss-gpu"
+black = "black -l 120 nessie/ tests/ scripts/"
+isort = "isort --profile black nessie/ tests/ scripts/"
+format = ["black", "isort"]
 
 [tool.isort]
 profile = "black"

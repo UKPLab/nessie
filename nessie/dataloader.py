@@ -2,16 +2,15 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-import pandas as pd
+import awkward as ak
 import numpy as np
 import numpy.typing as npt
-import awkward as ak
-
+import pandas as pd
 
 
 @dataclass
 class TextClassificationDataset:
-    """ Dataset containing texts, gold and noisy labels for tasks like sentiment analysis or topic classification.
+    """Dataset containing texts, gold and noisy labels for tasks like sentiment analysis or topic classification.
 
     Args:
         texts: String sequence like List, numpy array, ...
@@ -33,7 +32,7 @@ class TextClassificationDataset:
 
 @dataclass
 class SequenceLabelingDataset:
-    """ Dataset containing tokens, gold and noisy labels for tasks like POS tagging or NER.
+    """Dataset containing tokens, gold and noisy labels for tasks like POS tagging or NER.
 
     Args:
         sentences: List of list of strings
@@ -87,7 +86,3 @@ def load_sequence_labeling_dataset(path: Path) -> SequenceLabelingDataset:
     dataset = SequenceLabelingDataset(sentences=sentences, gold_labels=gold_labels, noisy_labels=noisy_labels)
 
     return dataset
-
-
-
-

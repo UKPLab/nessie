@@ -93,9 +93,9 @@ def write_sentence_classification_csv(p: Path, texts: List[str], gold_labels: Li
 
 
 def set_my_seed(seed: int):
-    import transformers
-    import torch
     import pyro
+    import torch
+    import transformers
 
     global RANDOM_STATE
     RANDOM_STATE = seed
