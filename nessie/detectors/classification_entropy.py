@@ -18,6 +18,15 @@ class ClassificationEntropy(ModelBasedDetector):
     """
 
     def score(self, probabilities: npt.NDArray[float], **kwargs) -> npt.NDArray[float]:
+        """Scores the input according to their class distribution entropy.
+
+        Args:
+            probabilities: a (num_instances, num_classes) numpy array obtained from a machine learning model
+
+        Returns:
+            scores: a (num_instances,) numpy array containing the resulting scores
+        """
+
         scores = entropy(probabilities.T).T
         return scores
 

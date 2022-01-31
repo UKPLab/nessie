@@ -25,6 +25,17 @@ class ClassificationUncertainty(ModelBasedDetector):
     def score(
         self, labels: StringArray, probabilities: npt.NDArray[float], le: LabelEncoder, **kwargs
     ) -> npt.NDArray[float]:
+        """Scores the input according to their classification uncertainty.
+
+        Args:
+            labels: a (num_instances, ) string sequence containing the noisy label for each instance
+            probabilities: a (num_instances, num_classes) numpy array obtained from a machine learning model
+            le: the label encoder that allows converting the probabilities back to labels
+
+        Returns:
+            scores: a (num_instances,) numpy array containing the resulting scores
+        """
+
         labels_encoded = le.transform(labels)
         scores = probabilities[np.arange(len(probabilities)), labels_encoded]
 

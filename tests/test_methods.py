@@ -42,17 +42,27 @@ def classification_entropy_fixture() -> ClassificationEntropy:
     return ClassificationEntropy()
 
 
+@pytest.fixture
+def classification_uncertainty_fixture() -> ClassificationUncertainty:
+    return ClassificationUncertainty()
+
+
 @pytest.mark.parametrize(
     "detector_fixture",
-    ["majority_label_baseline_fixture", "classification_entropy_fixture"],
+    [
+        "majority_label_baseline_fixture",
+        "classification_entropy_fixture",
+        "classification_uncertainty_fixture",
+    ],
 )
 def test_detectors_for_text_classification(detector_fixture, request):
     detector: Detector = request.getfixturevalue(detector_fixture)
     ds = load_text_classification_tsv(PATH_EXAMPLE_DATA_TEXT)
 
     probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
+    le = LabelEncoder().fit(ds.noisy_labels)
 
-    params = {"texts": ds.texts, "labels": ds.noisy_labels, "probabilities": probabilities}
+    params = {"texts": ds.texts, "labels": ds.noisy_labels, "probabilities": probabilities, "le": le}
 
     detector.score(**params)
 
@@ -61,21 +71,22 @@ def test_detectors_for_text_classification(detector_fixture, request):
     "detector_fixture",
     [
         "majority_label_per_surface_form_baseline_fixture",
+        "classification_entropy_fixture",
+        "classification_uncertainty_fixture",
     ],
 )
 def test_detectors_for_text_classification_flat(detector_fixture, request):
     detector: Detector = request.getfixturevalue(detector_fixture)
     ds = load_sequence_labeling_dataset(PATH_EXAMPLE_DATA_TOKEN)
 
-    num_instances = ds.num_instances
-    num_labels = len(ds.tagset_noisy)
-
     flattened_probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
+    le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
 
     params = {
         "texts": ak.flatten(ds.sentences),
         "labels": ak.flatten(ds.noisy_labels),
         "probabilities": flattened_probabilities,
+        "le": le,
     }
 
     detector.score(**params)
@@ -85,13 +96,24 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
     "detector_fixture",
     [
         "majority_label_per_surface_form_baseline_fixture",
+        "classification_entropy_fixture",
+        "classification_uncertainty_fixture",
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request):
+    # TODO: Add alignment
     detector: Detector = request.getfixturevalue(detector_fixture)
     ds = load_sequence_labeling_dataset(PATH_EXAMPLE_DATA_SPAN)
 
-    params = {"texts": ak.flatten(ds.sentences), "labels": ak.flatten(ds.noisy_labels)}
+    flattened_probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
+    le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
+
+    params = {
+        "texts": ak.flatten(ds.sentences),
+        "labels": ak.flatten(ds.noisy_labels),
+        "probabilities": flattened_probabilities,
+        "le": le,
+    }
 
     detector.score(**params)
 
