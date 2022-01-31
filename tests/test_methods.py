@@ -9,6 +9,7 @@ from nessie.dataloader import (
 )
 from nessie.detectors import (
     BordaCount,
+    ClassificationEntropy,
     Detector,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
@@ -135,3 +136,17 @@ def test_borda_count():
     actual_ranks = rankdata(-scores, method="ordinal")
 
     assert np.array_equal(actual_ranks, np.array([2, 1, 3, 4]))
+
+
+@pytest.mark.parametrize(
+    "proba,expected", [([[0.1, 0.85, 0.05], [0.6, 0.3, 0.1], [0.39, 0.61, 0.0]], [0.51818621, 0.89794572, 0.66874809])]
+)
+def test_classification_entropy(proba, expected):
+    # https://modal-python.readthedocs.io/en/latest/content/query_strategies/uncertainty_sampling.html
+
+    probabilities = np.array(proba)
+
+    algo = ClassificationEntropy()
+    scores = algo.score(probabilities)
+
+    assert np.allclose(scores, expected)
