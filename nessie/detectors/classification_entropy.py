@@ -1,4 +1,4 @@
-import numpy as np
+import numpy.typing as npt
 from scipy.stats import entropy
 
 from nessie.detectors.error_detector import DetectorKind, ModelBasedDetector
@@ -17,12 +17,12 @@ class ClassificationEntropy(ModelBasedDetector):
     See also https://modal-python.readthedocs.io/en/latest/content/query_strategies/uncertainty_sampling.html
     """
 
-    def error_detector_kind(self):
-        return DetectorKind.SCORER
-
-    def score(self, probabilities: np.ndarray, **kwargs) -> np.ndarray:
+    def score(self, probabilities: npt.NDArray[float], **kwargs) -> npt.NDArray[float]:
         scores = entropy(probabilities.T).T
         return scores
+
+    def error_detector_kind(self):
+        return DetectorKind.SCORER
 
     def uses_probabilities(self) -> bool:
         return True

@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.typing as npt
 from scipy.stats import rankdata
 
 from nessie.detectors.error_detector import Detector, DetectorKind
@@ -17,7 +18,7 @@ class BordaCount(Detector):
     COLING 2020
     """
 
-    def score(self, ensemble_scores: np.ndarray) -> np.ndarray:
+    def score(self, ensemble_scores: npt.NDArray[float]) -> npt.NDArray[float]:
         """Aggregates the given ensemble scores obtained previously from several scorers into
         one by means of Borda count.
 
