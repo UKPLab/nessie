@@ -13,18 +13,23 @@ from nessie.detectors import (
     BordaCount,
     ClassificationEntropy,
     ClassificationUncertainty,
+    ConfidentLearning,
     Detector,
+    DropoutUncertainty,
     MajorityLabelBaseline,
-    MajorityLabelPerSurfaceFormBaseline, ConfidentLearning,
+    MajorityLabelPerSurfaceFormBaseline,
 )
 from tests.fixtures import (
     PATH_EXAMPLE_DATA_SPAN,
     PATH_EXAMPLE_DATA_TEXT,
     PATH_EXAMPLE_DATA_TOKEN,
     get_random_probabilities,
+    get_repeated_probabilities,
 )
 
 # Smoke tests
+
+T = 10
 
 
 @pytest.fixture
@@ -52,13 +57,19 @@ def confident_learning_fixture() -> ConfidentLearning:
     return ConfidentLearning()
 
 
+@pytest.fixture
+def dropout_uncertainty_fixture() -> DropoutUncertainty:
+    return DropoutUncertainty()
+
+
 @pytest.mark.parametrize(
     "detector_fixture",
     [
         "majority_label_baseline_fixture",
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
-        "confident_learning_fixture"
+        "confident_learning_fixture",
+        "dropout_uncertainty_fixture",
     ],
 )
 def test_detectors_for_text_classification(detector_fixture, request):
@@ -66,33 +77,14 @@ def test_detectors_for_text_classification(detector_fixture, request):
     ds = load_text_classification_tsv(PATH_EXAMPLE_DATA_TEXT)
 
     probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
+    repeated_probabilities = get_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     le = LabelEncoder().fit(ds.noisy_labels)
 
-    params = {"texts": ds.texts, "labels": ds.noisy_labels, "probabilities": probabilities, "le": le}
-
-    detector.score(**params)
-
-
-@pytest.mark.parametrize(
-    "detector_fixture",
-    [
-        "majority_label_per_surface_form_baseline_fixture",
-        "classification_entropy_fixture",
-        "classification_uncertainty_fixture",
-        "confident_learning_fixture"
-    ],
-)
-def test_detectors_for_text_classification_flat(detector_fixture, request):
-    detector: Detector = request.getfixturevalue(detector_fixture)
-    ds = load_sequence_labeling_dataset(PATH_EXAMPLE_DATA_TOKEN)
-
-    flattened_probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
-    le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
-
     params = {
-        "texts": ak.flatten(ds.sentences),
-        "labels": ak.flatten(ds.noisy_labels),
-        "probabilities": flattened_probabilities,
+        "texts": ds.texts,
+        "labels": ds.noisy_labels,
+        "probabilities": probabilities,
+        "repeated_probabilities": repeated_probabilities,
         "le": le,
     }
 
@@ -105,7 +97,37 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
         "majority_label_per_surface_form_baseline_fixture",
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
-        "confident_learning_fixture"
+        "confident_learning_fixture",
+        "dropout_uncertainty_fixture",
+    ],
+)
+def test_detectors_for_text_classification_flat(detector_fixture, request):
+    detector: Detector = request.getfixturevalue(detector_fixture)
+    ds = load_sequence_labeling_dataset(PATH_EXAMPLE_DATA_TOKEN)
+
+    flattened_probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
+    repeated_probabilities = get_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
+    le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
+
+    params = {
+        "texts": ak.flatten(ds.sentences),
+        "labels": ak.flatten(ds.noisy_labels),
+        "probabilities": flattened_probabilities,
+        "repeated_probabilities": repeated_probabilities,
+        "le": le,
+    }
+
+    detector.score(**params)
+
+
+@pytest.mark.parametrize(
+    "detector_fixture",
+    [
+        "majority_label_per_surface_form_baseline_fixture",
+        "classification_entropy_fixture",
+        "classification_uncertainty_fixture",
+        "confident_learning_fixture",
+        "dropout_uncertainty_fixture",
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request):
@@ -114,12 +136,15 @@ def test_detectors_for_span_labeling_flat(detector_fixture, request):
     ds = load_sequence_labeling_dataset(PATH_EXAMPLE_DATA_SPAN)
 
     flattened_probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
+    repeated_probabilities = get_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
+
     le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
 
     params = {
         "texts": ak.flatten(ds.sentences),
         "labels": ak.flatten(ds.noisy_labels),
         "probabilities": flattened_probabilities,
+        "repeated_probabilities": repeated_probabilities,
         "le": le,
     }
 
