@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Set
 
 import awkward as ak
 import numpy as np
@@ -29,6 +30,14 @@ class TextClassificationDataset:
 
         assert len(self.texts) == len(self.gold_labels) == len(self.noisy_labels)
 
+    @property
+    def tagset_noisy(self) -> Set[str]:
+        return set(self.noisy_labels)
+
+    @property
+    def num_instances(self) -> int:
+        return len(self.texts)
+
 
 @dataclass
 class SequenceLabelingDataset:
@@ -40,6 +49,10 @@ class SequenceLabelingDataset:
         noisy_labels: List of list of strings
     """
 
+    sentences: ak.Array
+    gold_labels: ak.Array
+    noisy_labels: ak.Array
+
     def __post_init__(self):
         self.sentences = ak.Array(self.sentences)
         self.gold_labels = ak.Array(self.gold_labels)
@@ -49,9 +62,13 @@ class SequenceLabelingDataset:
         assert ak.all(ak.num(self.sentences, axis=1) == ak.num(self.gold_labels, axis=1))
         assert ak.all(ak.num(self.sentences, axis=1) == ak.num(self.noisy_labels, axis=1))
 
-    sentences: ak.Array
-    gold_labels: ak.Array
-    noisy_labels: ak.Array
+    @property
+    def tagset_noisy(self) -> Set[str]:
+        return set(ak.flatten(self.noisy_labels))
+
+    @property
+    def num_instances(self) -> int:
+        return len(ak.flatten(self.noisy_labels))
 
 
 def load_text_classification_tsv(path: Path) -> TextClassificationDataset:
