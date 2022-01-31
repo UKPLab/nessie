@@ -15,7 +15,7 @@ from nessie.detectors import (
     ClassificationUncertainty,
     Detector,
     MajorityLabelBaseline,
-    MajorityLabelPerSurfaceFormBaseline,
+    MajorityLabelPerSurfaceFormBaseline, ConfidentLearning,
 )
 from tests.fixtures import (
     PATH_EXAMPLE_DATA_SPAN,
@@ -47,12 +47,18 @@ def classification_uncertainty_fixture() -> ClassificationUncertainty:
     return ClassificationUncertainty()
 
 
+@pytest.fixture
+def confident_learning_fixture() -> ConfidentLearning:
+    return ConfidentLearning()
+
+
 @pytest.mark.parametrize(
     "detector_fixture",
     [
         "majority_label_baseline_fixture",
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
+        "confident_learning_fixture"
     ],
 )
 def test_detectors_for_text_classification(detector_fixture, request):
@@ -73,6 +79,7 @@ def test_detectors_for_text_classification(detector_fixture, request):
         "majority_label_per_surface_form_baseline_fixture",
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
+        "confident_learning_fixture"
     ],
 )
 def test_detectors_for_text_classification_flat(detector_fixture, request):
@@ -98,6 +105,7 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
         "majority_label_per_surface_form_baseline_fixture",
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
+        "confident_learning_fixture"
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request):
