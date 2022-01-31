@@ -81,7 +81,9 @@ def test_detectors_for_span_labeling_flat(detector_fixture, request):
 # Method specific tests
 
 
-def test_majority_label_baseline(majority_label_baseline_fixture: MajorityLabelBaseline):
+def test_majority_label_baseline():
+    detector = MajorityLabelBaseline()
+
     texts = [
         "I like cookies.",
         "I like reindeer.",
@@ -91,14 +93,14 @@ def test_majority_label_baseline(majority_label_baseline_fixture: MajorityLabelB
 
     labels = ["pos", "pos", "pos", "neg"]
 
-    flags = majority_label_baseline_fixture.score(texts, labels)
+    flags = detector.score(texts, labels)
 
     assert list(flags) == [False, False, False, True]
 
 
-def test_majority_label_per_surface_form_baseline(
-    majority_label_per_surface_form_baseline_fixture: MajorityLabelPerSurfaceFormBaseline,
-):
+def test_majority_label_per_surface_form_baseline():
+    detector = MajorityLabelPerSurfaceFormBaseline()
+
     sentences = [
         ["Obama", "Harvard"],
         ["Harvard"],
@@ -114,7 +116,7 @@ def test_majority_label_per_surface_form_baseline(
     sentences = ak.flatten(ak.Array(sentences))
     labels = ak.flatten(ak.Array(labels))
 
-    flags = majority_label_per_surface_form_baseline_fixture.score(sentences, labels)
+    flags = detector.score(sentences, labels)
 
     assert len(sentences) == len(labels) == len(flags)
     assert list(flags) == [False, False, False, True, False]
