@@ -1,11 +1,14 @@
 import awkward as ak
+import numpy as np
 import pytest
+from scipy.stats import rankdata
 
 from nessie.dataloader import (
     load_sequence_labeling_dataset,
     load_text_classification_tsv,
 )
 from nessie.detectors import (
+    BordaCount,
     Detector,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
@@ -114,3 +117,21 @@ def test_majority_label_per_surface_form_baseline(
 
     assert len(sentences) == len(labels) == len(flags)
     assert list(flags) == [False, False, False, True, False]
+
+
+def test_borda_count():
+    votes = np.array(
+        [
+            [4, 3, 2, 1],
+            [4, 3, 2, 1],
+            [1, 4, 3, 2],
+        ]
+    )
+
+    method = BordaCount()
+    scores = method.score(votes)
+
+    # We invert scores so that ranks are computed from largest to lowest
+    actual_ranks = rankdata(-scores, method="ordinal")
+
+    assert np.array_equal(actual_ranks, np.array([2, 1, 3, 4]))
