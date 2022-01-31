@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from numpy.random import default_rng
 from scipy.stats import rankdata
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import LabelEncoder, normalize
 
 from nessie.dataloader import (
     load_sequence_labeling_dataset,
@@ -12,6 +12,7 @@ from nessie.dataloader import (
 from nessie.detectors import (
     BordaCount,
     ClassificationEntropy,
+    ClassificationUncertainty,
     Detector,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
@@ -20,6 +21,7 @@ from tests.fixtures import (
     PATH_EXAMPLE_DATA_SPAN,
     PATH_EXAMPLE_DATA_TEXT,
     PATH_EXAMPLE_DATA_TOKEN,
+    get_random_probabilities,
 )
 
 # Smoke tests
@@ -48,12 +50,7 @@ def test_detectors_for_text_classification(detector_fixture, request):
     detector: Detector = request.getfixturevalue(detector_fixture)
     ds = load_text_classification_tsv(PATH_EXAMPLE_DATA_TEXT)
 
-    num_instances = ds.num_instances
-    num_labels = len(ds.tagset_noisy)
-
-    rng = default_rng()
-    probabilities = rng.random((num_instances, num_labels))
-    probabilities = normalize(probabilities, norm="l1", axis=1)
+    probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
 
     params = {"texts": ds.texts, "labels": ds.noisy_labels, "probabilities": probabilities}
 
@@ -73,9 +70,7 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
     num_instances = ds.num_instances
     num_labels = len(ds.tagset_noisy)
 
-    rng = default_rng()
-    flattened_probabilities = rng.random((num_instances, num_labels))
-    flattened_probabilities = normalize(flattened_probabilities, norm="l1", axis=1)
+    flattened_probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
 
     params = {
         "texts": ak.flatten(ds.sentences),
@@ -171,7 +166,25 @@ def test_classification_entropy(proba, expected):
 
     probabilities = np.array(proba)
 
-    algo = ClassificationEntropy()
-    scores = algo.score(probabilities)
+    detector = ClassificationEntropy()
+    scores = detector.score(probabilities)
 
     assert np.allclose(scores, expected)
+
+
+def test_classification_uncertainty():
+    n = 100
+    k = 4
+
+    le = LabelEncoder()
+    le.classes_ = np.array(["A", "B", "C", "D"], dtype=object)
+
+    probabilities = get_random_probabilities(n, k)
+    encoded_labels = np.random.randint(0, k, n)
+    labels = le.inverse_transform(encoded_labels)
+    expected_scores = 1 - np.array([probabilities[i, encoded_labels[i]] for i in range(n)])
+
+    detector = ClassificationUncertainty()
+    scores = detector.score(labels, probabilities, le)
+
+    assert np.array_equal(scores, expected_scores)
