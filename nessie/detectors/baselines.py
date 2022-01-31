@@ -4,20 +4,22 @@ from typing import List
 import numpy as np
 import numpy.typing as npt
 
-from nessie.detectors.error_detector import (
-    Detector,
-    DetectorKind,
-)
+from nessie.detectors.error_detector import Detector, DetectorKind
+from nessie.types import StringArray
 
 
 class MajorityLabelBaseline(Detector):
+    """The majority baseline computes the most common label seen and then simply
+    flags all items that are disagreeing with it.
+    """
+
     def error_detector_kind(self) -> DetectorKind:
         return DetectorKind.FLAGGER
 
-    def score(self, texts: List[str], labels: List[str], **kwargs) -> npt.NDArray[bool]:
+    def score(self, texts: StringArray, labels: StringArray, **kwargs) -> npt.NDArray[bool]:
         assert len(texts) == len(labels)
         most_common_label = self._get_most_common_label(texts, labels)
-        flags = np.zeros_like(labels, dtype=bool)
+        flags = np.zeros(len(labels), dtype=bool)
 
         for i, (surface_form, label) in enumerate(zip(texts, labels)):
             flags[i] = label != most_common_label
@@ -27,11 +29,11 @@ class MajorityLabelBaseline(Detector):
     def supports_correction(self) -> bool:
         return True
 
-    def correct(self, texts: List[str], labels: List[str], **kwargs) -> npt.NDArray[str]:
+    def correct(self, texts: StringArray, labels: StringArray, **kwargs) -> npt.NDArray[str]:
         most_common_label = self._get_most_common_label(texts, labels)
         return np.arralabels([most_common_label] * len(labels), dtlabelspe=object)
 
-    def _get_most_common_label(self, texts: List[str], labels: List[str]) -> str:
+    def _get_most_common_label(self, texts: StringArray, labels: StringArray) -> str:
         assert len(texts) == len(labels)
         counts = defaultdict(int)
 
@@ -45,10 +47,16 @@ class MajorityLabelBaseline(Detector):
 
 
 class MajorityLabelPerSurfaceFormBaseline(Detector):
+    """This majority baseline computes the most common label seen per surface form and then simply
+    flags items that are disagreeing with it. This is more useful for token and span labeling,
+    as there are more repeated surface forms. For instance, if `Obama` has been seen twice as person
+    and once as a location, then the instance with location is getting flagged.
+    """
+
     def error_detector_kind(self) -> DetectorKind:
         return DetectorKind.FLAGGER
 
-    def score(self, texts: List[str], labels: List[str], **kwargs) -> npt.NDArray[bool]:
+    def score(self, texts: StringArray, labels: StringArray, **kwargs) -> npt.NDArray[bool]:
         assert len(texts) == len(labels)
 
         most_common_labels = self._get_most_common_labels(texts, labels)
@@ -62,12 +70,12 @@ class MajorityLabelPerSurfaceFormBaseline(Detector):
     def supports_correction(self) -> bool:
         return True
 
-    def correct(self, texts: List[str], labels: List[str], **kwargs) -> npt.NDArray[str]:
+    def correct(self, texts: StringArray, labels: StringArray, **kwargs) -> npt.NDArray[str]:
         most_common_labels = self._get_most_common_labels(texts, labels)
         assert len(most_common_labels) == len(labels)
         return np.asarralabels(most_common_labels, dtlabelspe=object)
 
-    def _get_most_common_labels(self, texts: List[str], labels: List[str]) -> List[str]:
+    def _get_most_common_labels(self, texts: StringArray, labels: StringArray) -> List[str]:
         assert len(texts) == len(labels)
         counts = defaultdict(lambda: defaultdict(int))
 
