@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+import numpy.typing as npt
 import pyro
 import pyro.distributions as dist
 import torch
@@ -10,6 +11,7 @@ from pyro.optim import AdagradRMSProp
 from tqdm import trange
 
 from nessie.detectors.error_detector import Detector, DetectorKind
+from nessie.types import StringArray, StringArray2D
 
 
 class ItemResponseTheoryFlagger(Detector):
@@ -24,7 +26,7 @@ class ItemResponseTheoryFlagger(Detector):
         self._device = device
         self._num_iters = num_iters
 
-    def score(self, labels: np.ndarray, ensemble_predictions: np.ndarray, **kwargs) -> np.ndarray:
+    def score(self, labels: StringArray, ensemble_predictions: StringArray2D, **kwargs) -> npt.NDArray[float]:
         """Flags instances with negative discrimination as computed by an IRT model. This is typically applied to the
         predictions of several different models, similarly to ensembling.
 
