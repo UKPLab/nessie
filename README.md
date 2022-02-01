@@ -8,6 +8,13 @@ This installs the package with default dependencies and PyTorch with only CPU su
 If you want to use your own PyTorch version, you need to force install it afterwards. 
 If you need `faiss-gpu`, then you should also install that manually afterwards.
 
+
+## Models 
+
+Available models are
+
+You can add your own models by implementing the respective abstract class for `TextClassifier` or `SequenceTagger`.
+
 ## Development
 
     poetry install

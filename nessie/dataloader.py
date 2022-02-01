@@ -38,6 +38,16 @@ class TextClassificationDataset:
     def num_instances(self) -> int:
         return len(self.texts)
 
+    def subset(self, n: int) -> "TextClassificationDataset":
+        if n > self.num_instances:
+            raise IndexError(f"Dataset only contains [{self.num_instances}] instances, but asked were [{n}")
+
+        return TextClassificationDataset(
+            self.texts[:n],
+            self.gold_labels[:n],
+            self.noisy_labels[:n],
+        )
+
 
 @dataclass
 class SequenceLabelingDataset:
@@ -67,8 +77,22 @@ class SequenceLabelingDataset:
         return set(ak.flatten(self.noisy_labels))
 
     @property
+    def num_sentences(self) -> int:
+        return len(self.sentences)
+
+    @property
     def num_instances(self) -> int:
         return len(ak.flatten(self.noisy_labels))
+
+    def subset(self, n: int) -> "SequenceLabelingDataset":
+        if n > self.num_sentences:
+            raise IndexError(f"Dataset only contains [{self.num_sentences}] sentences, but asked were [{n}")
+
+        return SequenceLabelingDataset(
+            self.sentences[:n],
+            self.gold_labels[:n],
+            self.noisy_labels[:n],
+        )
 
 
 def load_text_classification_tsv(path: Path) -> TextClassificationDataset:
