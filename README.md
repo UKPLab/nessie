@@ -1,3 +1,5 @@
+<img src="img/nessie_with_text.svg" alt="Nessie Logo">
+
 # nessie
 
 ## Installation
@@ -5,23 +7,58 @@
     pip install nessie
 
 This installs the package with default dependencies and PyTorch with only CPU support.
-If you want to use your own PyTorch version, you need to force install it afterwards. 
+If you want to use your own PyTorch version, you need to install it afterwards manually. 
 If you need `faiss-gpu`, then you should also install that manually afterwards.
-
 
 ## Models 
 
-Available models are
-
+Model-based annotation detection methods need trained models to obtain predictions or probabilities.
+We already implemented the most common models for you to be ready to use.
 You can add your own models by implementing the respective abstract class for `TextClassifier` or `SequenceTagger`.
+We provide the following models:
+
+### Text classification
+
+| Class name                | Description                                   |
+|---------------------------|-----------------------------------------------|
+| FastTextTextClassifier    | Fasttext                                      |
+| FlairTextClassifier       | Flair                                         |
+| LgbmTextClassifier        | LightGBM with handcrafted features            |
+| LgbmTextClassifier        | LightGBM with S-BERT features                 |
+| MaxEntTextClassifier      | Logistic Regression with handcrafted features |
+| MaxEntTextClassifier      | Logistic with S-BERT features                 |
+| TransformerTextClassifier | Transformers                                  |
+
+You can easily add your own sklearn classifiers by subclassing `SvmTextClassifier` like the following:
+
+    class MaxEntTextClassifier(SklearnTextClassifier):
+        def __init__(self, embedder: SentenceEmbedder, max_iter=10000):
+            super().__init__(lambda: LogisticRegression(max_iter=max_iter, random_state=RANDOM_STATE), embedder)
+
+### Sequence Classification
+
+| Class name                | Description                   |
+|---------------------------|-------------------------------|
+| FlairSequenceTagger       | Flair                         |
+| CrfSequenceTagger         | CRF with handcrafted features |
+| MaxEntSequenceTagger      | Maxent sequence tagger        |
+| TransformerSequenceTagger | Transformer                   |
 
 ## Development
 
+We use [poetry](https://python-poetry.org/) for dependency management and packaging.
+Follow their documentation to install it. Then you can run
+
     poetry install
 
+to download the dependencies and install in its own environment.
 In order to install your own PyTorch with CUDA, you can run
 
     poetry shell
     poe force-cuda113
 
-or install it manually in the poetry environment.
+or install it manually in the poetry environment. You can format the code via
+
+    poe format
+
+which should be run before every commit.
