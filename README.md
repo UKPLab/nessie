@@ -1,6 +1,6 @@
 <img src="img/nessie_with_text.svg" alt="Nessie Logo">
 
-`nessie` is a package for annotation error detection. Recent work has shown that datasets used to evaluate
+**nessie** is a package for annotation error detection. Recent work has shown that datasets used to evaluate
 machine learning models still a considerable number of annotation errors. Annotation error detection can be
 used to automatically detect these so that human annotators can concentrate on a subset to correct, instead
 of needing to look at each and every instance.
