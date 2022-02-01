@@ -1,14 +1,14 @@
+from pathlib import Path
+
 import awkward as ak
 import numpy as np
 import pytest
+from _pytest.fixtures import FixtureRequest
+from flair.embeddings import TransformerWordEmbeddings
 from numpy.random import default_rng
 from scipy.stats import rankdata
-from sklearn.preprocessing import LabelEncoder, normalize
+from sklearn.preprocessing import LabelEncoder
 
-from nessie.dataloader import (
-    load_sequence_labeling_dataset,
-    load_text_classification_tsv,
-)
 from nessie.detectors import (
     BordaCount,
     ClassificationEntropy,
@@ -21,10 +21,14 @@ from nessie.detectors import (
     MajorityLabelPerSurfaceFormBaseline,
     MajorityVotingEnsemble,
 )
+from nessie.detectors.knn_entropy import KnnEntropy
+from nessie.models.featurizer import (
+    CachedSentenceTransformer,
+    FlairTokenEmbeddingsWrapper,
+)
 from tests.fixtures import (
-    PATH_EXAMPLE_DATA_SPAN,
-    PATH_EXAMPLE_DATA_TEXT,
-    PATH_EXAMPLE_DATA_TOKEN,
+    BERT_BASE,
+    SBERT_MODEL_NAME,
     generate_random_pos_tagging_dataset,
     generate_random_text_classification_dataset,
     get_random_ensemble_predictions,
@@ -32,12 +36,12 @@ from tests.fixtures import (
     get_random_repeated_probabilities,
 )
 
-# Smoke tests
-
 NUM_INSTANCES = 100
 NUM_LABELS = 4
 NUM_MODELS = 3
 T = 10
+
+# Method fixtures
 
 
 @pytest.fixture
@@ -80,6 +84,29 @@ def irt_fixture() -> ItemResponseTheoryFlagger:
     return ItemResponseTheoryFlagger(num_iters=5)
 
 
+@pytest.fixture
+def knn_entropy_fixture() -> KnnEntropy:
+    return KnnEntropy()
+
+
+# Embedder
+
+
+@pytest.fixture
+def sentence_embedder_fixture(request: FixtureRequest) -> CachedSentenceTransformer:
+    cache_path = Path(request.fspath).parent / ".my_test_cache"
+
+    return CachedSentenceTransformer(SBERT_MODEL_NAME, cache_dir=cache_path)
+
+
+@pytest.fixture
+def token_embedder_fixture() -> FlairTokenEmbeddingsWrapper:
+    return FlairTokenEmbeddingsWrapper(TransformerWordEmbeddings(BERT_BASE))
+
+
+# Smoke tests
+
+
 @pytest.mark.parametrize(
     "detector_fixture",
     [
@@ -90,15 +117,19 @@ def irt_fixture() -> ItemResponseTheoryFlagger:
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
+        "knn_entropy_fixture",
     ],
 )
-def test_detectors_for_text_classification(detector_fixture, request):
+def test_detectors_for_text_classification(
+    detector_fixture, request: FixtureRequest, sentence_embedder_fixture: CachedSentenceTransformer
+):
     detector: Detector = request.getfixturevalue(detector_fixture)
     ds = generate_random_text_classification_dataset(NUM_INSTANCES, NUM_LABELS)
 
     probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
     repeated_probabilities = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
+    embedded_sentences = sentence_embedder_fixture.embed(ds.texts)
     le = LabelEncoder().fit(ds.noisy_labels)
 
     params = {
@@ -107,6 +138,7 @@ def test_detectors_for_text_classification(detector_fixture, request):
         "probabilities": probabilities,
         "repeated_probabilities": repeated_probabilities,
         "ensemble_predictions": ensemble_predictions,
+        "embedded_instances": embedded_sentences,
         "le": le,
     }
 
@@ -123,15 +155,19 @@ def test_detectors_for_text_classification(detector_fixture, request):
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
+        "knn_fixture",
     ],
 )
-def test_detectors_for_text_classification_flat(detector_fixture, request):
+def test_detectors_for_text_classification_flat(
+    detector_fixture, request: FixtureRequest, token_embedder_fixture: FlairTokenEmbeddingsWrapper
+):
     detector: Detector = request.getfixturevalue(detector_fixture)
     ds = generate_random_pos_tagging_dataset(NUM_INSTANCES, NUM_LABELS)
 
     probabilities_flat = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
     repeated_probabilities_flat = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
+    embedded_tokens = token_embedder_fixture.embed(ds.sentences, flat=True)
     le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
 
     params = {
@@ -140,6 +176,7 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
         "probabilities": probabilities_flat,
         "repeated_probabilities": repeated_probabilities_flat,
         "ensemble_predictions": ensemble_predictions,
+        "embedded_instances": embedded_tokens,
         "le": le,
     }
 
@@ -158,7 +195,7 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
         "irt_fixture",
     ],
 )
-def test_detectors_for_span_labeling_flat(detector_fixture, request):
+def test_detectors_for_span_labeling_flat(detector_fixture, request: FixtureRequest):
     pass
 
 

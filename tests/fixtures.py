@@ -20,6 +20,15 @@ PATH_EXAMPLE_DATA_TOKEN: Path = PATH_EXAMPLE_DATA / "easy_token.conll"
 PATH_EXAMPLE_DATA_SPAN: Path = PATH_EXAMPLE_DATA / "easy_span.conll"
 
 
+# Constants
+
+BERT_BASE = "google/bert_uncased_L-2_H-128_A-2"
+SBERT_MODEL_NAME = "all-MiniLM-L6-v2"
+
+
+# Datasets
+
+
 def generate_random_text_classification_dataset(num_instances: int, num_labels: int) -> TextClassificationDataset:
     rng = default_rng(seed=RANDOM_STATE)
 

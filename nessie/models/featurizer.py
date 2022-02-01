@@ -94,7 +94,7 @@ class FlairTokenEmbeddingsWrapper:
         self._batch_size = batch_size
 
     def embed(self, sentences: RaggedStringArray, flat: bool = False) -> Union[npt.NDArray[float], ak.Array]:
-        flair_sentences = [Sentence(x) for x in sentences]
+        flair_sentences = [Sentence(list(x)) for x in sentences]
 
         embedded = []
         for sentence_batch in chunked(flair_sentences, self._batch_size):

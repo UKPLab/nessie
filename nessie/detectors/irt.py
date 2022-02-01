@@ -26,7 +26,7 @@ class ItemResponseTheoryFlagger(Detector):
         self._device = device
         self._num_iters = num_iters
 
-    def score(self, labels: StringArray, ensemble_predictions: StringArray2D, **kwargs) -> npt.NDArray[float]:
+    def score(self, labels: StringArray, ensemble_predictions: StringArray2D, **kwargs) -> npt.NDArray[bool]:
         """Flags instances with negative discrimination as computed by an IRT model. This is typically applied to the
         predictions of several different models, similarly to ensembling.
 

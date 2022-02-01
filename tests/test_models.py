@@ -25,10 +25,12 @@ from nessie.models.text import (
     MaxEntTextClassifier,
     TransformerTextClassifier,
 )
-from tests.fixtures import PATH_EXAMPLE_DATA_TEXT, PATH_EXAMPLE_DATA_TOKEN
-
-BERT_BASE = "google/bert_uncased_L-2_H-128_A-2"
-SBERT_MODEL_NAME = "all-MiniLM-L6-v2"
+from tests.fixtures import (
+    BERT_BASE,
+    PATH_EXAMPLE_DATA_TEXT,
+    PATH_EXAMPLE_DATA_TOKEN,
+    SBERT_MODEL_NAME,
+)
 
 # Sequence Tagger
 

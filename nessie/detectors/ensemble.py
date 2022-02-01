@@ -7,7 +7,7 @@ from nessie.types import StringArray, StringArray2D
 
 
 class MajorityVotingEnsemble(Detector):
-    def score(self, labels: StringArray, ensemble_predictions: StringArray2D, **kwargs) -> npt.NDArray[float]:
+    def score(self, labels: StringArray, ensemble_predictions: StringArray2D, **kwargs) -> npt.NDArray[bool]:
         """Flag instances where majority predictions disagree with given labels.
 
         Args:
