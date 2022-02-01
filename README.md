@@ -1,6 +1,9 @@
 <img src="img/nessie_with_text.svg" alt="Nessie Logo">
 
-# nessie
+`nessie` is a package for annotation error detection. Recent work has shown that datasets used to evaluate
+machine learning models still a considerable number of annotation errors. Annotation error detection can be
+used to automatically detect these so that human annotators can concentrate on a subset to correct, instead
+of needing to look at each and every instance.
 
 ## Installation
 
@@ -9,6 +12,12 @@
 This installs the package with default dependencies and PyTorch with only CPU support.
 If you want to use your own PyTorch version, you need to install it afterwards manually. 
 If you need `faiss-gpu`, then you should also install that manually afterwards.
+
+## Methods
+
+We implement a wide range of annotation error detection methods. These are divided in two categories, *flaggers* and
+*scorers*. *Flaggers* give a binary judgement whether an instance is considered wrong, *Scorers* give a certainty
+estimate how likely it is that an instance is wrong.
 
 ## Models 
 
@@ -29,7 +38,7 @@ We provide the following models:
 | MaxEntTextClassifier      | Logistic with S-BERT features                 |
 | TransformerTextClassifier | Transformers                                  |
 
-You can easily add your own sklearn classifiers by subclassing `SvmTextClassifier` like the following:
+You can easily add your own sklearn classifiers by subclassing `SklearnTextClassifier` like the following:
 
     class MaxEntTextClassifier(SklearnTextClassifier):
         def __init__(self, embedder: SentenceEmbedder, max_iter=10000):
