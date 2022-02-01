@@ -19,6 +19,7 @@ from nessie.detectors import (
     ItemResponseTheoryFlagger,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
+    MajorityVotingEnsemble,
 )
 from tests.fixtures import (
     PATH_EXAMPLE_DATA_SPAN,
@@ -70,6 +71,11 @@ def dropout_uncertainty_fixture() -> DropoutUncertainty:
 
 
 @pytest.fixture
+def ensemble_fixture() -> MajorityVotingEnsemble:
+    return MajorityVotingEnsemble()
+
+
+@pytest.fixture
 def irt_fixture() -> ItemResponseTheoryFlagger:
     return ItemResponseTheoryFlagger(num_iters=5)
 
@@ -82,6 +88,7 @@ def irt_fixture() -> ItemResponseTheoryFlagger:
         "classification_uncertainty_fixture",
         "confident_learning_fixture",
         "dropout_uncertainty_fixture",
+        "ensemble_fixture",
         "irt_fixture",
     ],
 )
@@ -114,6 +121,7 @@ def test_detectors_for_text_classification(detector_fixture, request):
         "classification_uncertainty_fixture",
         "confident_learning_fixture",
         "dropout_uncertainty_fixture",
+        "ensemble_fixture",
         "irt_fixture",
     ],
 )
@@ -146,6 +154,7 @@ def test_detectors_for_text_classification_flat(detector_fixture, request):
         "classification_uncertainty_fixture",
         "confident_learning_fixture",
         "dropout_uncertainty_fixture",
+        "ensemble_fixture",
         "irt_fixture",
     ],
 )
@@ -245,3 +254,20 @@ def test_classification_uncertainty():
     scores = detector.score(labels, probabilities, le)
 
     assert np.array_equal(scores, expected_scores)
+
+
+def test_ensemble():
+    labels = ["A", "B", "B", "A"]
+
+    ensemble_predictions = [
+        ["A", "A", "B", "A"],
+        ["A", "A", "A", "B"],
+        ["B", "B", "B", "B"],
+    ]
+
+    expected_flags = [False, True, False, True]
+
+    detector = MajorityVotingEnsemble()
+    flags = list(detector.score(labels, ensemble_predictions))
+
+    assert flags == expected_flags
