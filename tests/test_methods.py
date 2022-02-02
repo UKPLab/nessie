@@ -17,6 +17,7 @@ from nessie.detectors import (
     Detector,
     DropoutUncertainty,
     ItemResponseTheoryFlagger,
+    LabelAggregation,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
     MajorityVotingEnsemble,
@@ -89,6 +90,11 @@ def knn_entropy_fixture() -> KnnEntropy:
     return KnnEntropy()
 
 
+@pytest.fixture
+def label_aggregation_fixture() -> LabelAggregation():
+    return LabelAggregation()
+
+
 # Embedder
 
 
@@ -118,6 +124,7 @@ def token_embedder_fixture() -> FlairTokenEmbeddingsWrapper:
         "ensemble_fixture",
         "irt_fixture",
         "knn_entropy_fixture",
+        "label_aggregation_fixture",
     ],
 )
 def test_detectors_for_text_classification(
@@ -155,7 +162,8 @@ def test_detectors_for_text_classification(
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
-        "knn_fixture",
+        "knn_entropy_fixture",
+        "label_aggregation_fixture",
     ],
 )
 def test_detectors_for_text_classification_flat(
@@ -193,6 +201,8 @@ def test_detectors_for_text_classification_flat(
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
+        "knn_entropy_fixture",
+        "label_aggregation_fixture",
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request: FixtureRequest):

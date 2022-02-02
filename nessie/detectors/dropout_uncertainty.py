@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 
 from nessie.detectors.error_detector import Detector, DetectorKind
+from nessie.types import FloatArray2D
 
 
 class DropoutUncertainty(Detector):
@@ -24,12 +25,12 @@ class DropoutUncertainty(Detector):
     def error_detector_kind(self):
         return DetectorKind.SCORER
 
-    def score(self, repeated_probabilities: npt.NDArray[float], **kwargs) -> npt.NDArray[float]:
+    def score(self, repeated_probabilities: FloatArray2D, **kwargs) -> npt.NDArray[float]:
         """Given probabilities obtained via Monte Carlo Dropout, compute the score via
         the  entropy of the model predictions.
 
         Args:
-            repeated_probabilities: A numpy array of (num_instances, T, num_classes) which has T label distributions
+            repeated_probabilities: A float array of (num_instances, T, num_classes) which has T label distributions
             per instance, e.g. as obtained by using different dropout for each prediction run during inference.
 
         Returns:

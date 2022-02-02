@@ -51,9 +51,9 @@ class KnnErrorDetector(Detector, ABC):
 
         kind = self.error_detector_kind()
         if kind == DetectorKind.SCORER:
-            scores = np.empty_like(labels, dtype=np.float64)
+            scores = np.empty(len(labels), dtype=np.float64)
         elif kind == DetectorKind.FLAGGER:
-            scores = np.empty_like(labels, dtype=bool)
+            scores = np.empty(len(labels), dtype=bool)
         else:
             raise NotImplementedError(kind)
 

@@ -29,7 +29,7 @@ class ConfidentLearning(ModelBasedDetector):
             probabilities: a (num_instances, num_classes) numpy array obtained from a machine learning model
             le: the label encoder that allows converting the probabilities back to labels
         Returns:
-            scores: a (num_instances,) numpy array of bools containing the flags after using CL
+            a (num_instances,) numpy array of bools containing the flags after using CL
         """
 
         s = le.transform(labels)
