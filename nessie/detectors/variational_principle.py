@@ -5,9 +5,7 @@ from typing import Any, Iterator, List, Tuple
 
 import awkward as ak
 import numpy as np
-import numpy.typing as npt
 from iobes import SpanEncoding, parse_spans
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from suffix_tree import Tree
 from tqdm import tqdm
 
