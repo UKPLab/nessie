@@ -11,6 +11,7 @@ from scipy.stats import entropy
 from tqdm import trange
 
 from nessie.detectors.error_detector import Detector, DetectorKind
+from nessie.types import FloatArray2D, StringArray
 
 
 class KnnErrorDetector(Detector, ABC):
@@ -30,7 +31,7 @@ class KnnErrorDetector(Detector, ABC):
     def __init__(self, k: float = 10):
         self._k = k
 
-    def score(self, labels: List[str], embedded_instances: npt.NDArray[float], **kwargs) -> npt.NDArray[float]:
+    def score(self, labels: StringArray, embedded_instances: FloatArray2D, **kwargs) -> npt.NDArray[float]:
         """Finds neighbours of each instance in the embedding space, computes a distribution over
         labels based on their distance, the resulting score is the entropy over this distribution.
 
