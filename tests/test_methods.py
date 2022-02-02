@@ -1,10 +1,7 @@
-from pathlib import Path
-
 import awkward as ak
 import numpy as np
 import pytest
 from _pytest.fixtures import FixtureRequest
-from flair.embeddings import TransformerWordEmbeddings
 from numpy.random import default_rng
 from scipy.stats import rankdata
 from sklearn.preprocessing import LabelEncoder
@@ -27,9 +24,7 @@ from nessie.models.featurizer import (
     CachedSentenceTransformer,
     FlairTokenEmbeddingsWrapper,
 )
-from tests.fixtures import (
-    BERT_BASE,
-    SBERT_MODEL_NAME,
+from tests.conftest import (
     generate_random_pos_tagging_dataset,
     generate_random_text_classification_dataset,
     get_random_ensemble_predictions,
@@ -95,21 +90,6 @@ def label_aggregation_fixture() -> LabelAggregation():
     return LabelAggregation()
 
 
-# Embedder
-
-
-@pytest.fixture
-def sentence_embedder_fixture(request: FixtureRequest) -> CachedSentenceTransformer:
-    cache_path = Path(request.fspath).parent / ".my_test_cache"
-
-    return CachedSentenceTransformer(SBERT_MODEL_NAME, cache_dir=cache_path)
-
-
-@pytest.fixture
-def token_embedder_fixture() -> FlairTokenEmbeddingsWrapper:
-    return FlairTokenEmbeddingsWrapper(TransformerWordEmbeddings(BERT_BASE))
-
-
 # Smoke tests
 
 
@@ -136,7 +116,12 @@ def test_detectors_for_text_classification(
     probabilities = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
     repeated_probabilities = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
-    embedded_sentences = sentence_embedder_fixture.embed(ds.texts)
+
+    embedded_sentences = request.config.cache.get("methods/text/embedded_sentences", None)
+    if embedded_sentences is None:
+        embedded_sentences = sentence_embedder_fixture.embed(ds.texts)
+        request.config.cache.set("methods/text/embedded_sentences", embedded_sentences.tolist())
+
     le = LabelEncoder().fit(ds.noisy_labels)
 
     params = {
@@ -145,7 +130,7 @@ def test_detectors_for_text_classification(
         "probabilities": probabilities,
         "repeated_probabilities": repeated_probabilities,
         "ensemble_predictions": ensemble_predictions,
-        "embedded_instances": embedded_sentences,
+        "embedded_instances": np.asarray(embedded_sentences),
         "le": le,
     }
 
@@ -166,7 +151,7 @@ def test_detectors_for_text_classification(
         "label_aggregation_fixture",
     ],
 )
-def test_detectors_for_text_classification_flat(
+def test_detectors_for_token_classification_flat(
     detector_fixture, request: FixtureRequest, token_embedder_fixture: FlairTokenEmbeddingsWrapper
 ):
     detector: Detector = request.getfixturevalue(detector_fixture)
@@ -175,7 +160,12 @@ def test_detectors_for_text_classification_flat(
     probabilities_flat = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
     repeated_probabilities_flat = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
-    embedded_tokens = token_embedder_fixture.embed(ds.sentences, flat=True)
+
+    embedded_tokens = request.config.cache.get("methods/token/embedded_tokens", None)
+    if embedded_tokens is None:
+        embedded_tokens = token_embedder_fixture.embed(ds.sentences, flat=True)
+        request.config.cache.set("methods/token/embedded_tokens", embedded_tokens.tolist())
+
     le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
 
     params = {
@@ -184,7 +174,7 @@ def test_detectors_for_text_classification_flat(
         "probabilities": probabilities_flat,
         "repeated_probabilities": repeated_probabilities_flat,
         "ensemble_predictions": ensemble_predictions,
-        "embedded_instances": embedded_tokens,
+        "embedded_instances": np.asarray(embedded_tokens),
         "le": le,
     }
 

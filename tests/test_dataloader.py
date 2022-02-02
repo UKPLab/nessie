@@ -2,7 +2,7 @@ from nessie.dataloader import (
     load_sequence_labeling_dataset,
     load_text_classification_tsv,
 )
-from tests.fixtures import (
+from tests.conftest import (
     PATH_EXAMPLE_DATA_SPAN,
     PATH_EXAMPLE_DATA_TEXT,
     PATH_EXAMPLE_DATA_TOKEN,

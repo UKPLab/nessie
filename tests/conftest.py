@@ -4,10 +4,16 @@ from typing import Set
 import awkward as ak
 import numpy as np
 import numpy.typing as npt
+import pytest
+from flair.embeddings import TransformerWordEmbeddings
 from numpy.random import default_rng
 from sklearn.preprocessing import normalize
 
 from nessie.dataloader import SequenceLabelingDataset, TextClassificationDataset
+from nessie.models.featurizer import (
+    CachedSentenceTransformer,
+    FlairTokenEmbeddingsWrapper,
+)
 from nessie.noise import flipped_label_noise
 from nessie.util import RANDOM_STATE
 
@@ -24,6 +30,19 @@ PATH_EXAMPLE_DATA_SPAN: Path = PATH_EXAMPLE_DATA / "easy_span.conll"
 
 BERT_BASE = "google/bert_uncased_L-2_H-128_A-2"
 SBERT_MODEL_NAME = "all-MiniLM-L6-v2"
+
+
+# Embedder
+
+
+@pytest.fixture(scope="session")
+def sentence_embedder_fixture() -> CachedSentenceTransformer:
+    return CachedSentenceTransformer(SBERT_MODEL_NAME)
+
+
+@pytest.fixture(scope="session")
+def token_embedder_fixture() -> FlairTokenEmbeddingsWrapper:
+    return FlairTokenEmbeddingsWrapper(TransformerWordEmbeddings(BERT_BASE))
 
 
 # Datasets

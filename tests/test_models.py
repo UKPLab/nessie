@@ -11,7 +11,7 @@ from nessie.dataloader import (
     load_text_classification_tsv,
 )
 from nessie.models import SequenceTagger, TextClassifier
-from nessie.models.featurizer import CachedSentenceTransformer, TfIdfSentenceEmbedder
+from nessie.models.featurizer import TfIdfSentenceEmbedder
 from nessie.models.tagging import (
     CrfSequenceTagger,
     FlairSequenceTagger,
@@ -25,12 +25,7 @@ from nessie.models.text import (
     MaxEntTextClassifier,
     TransformerTextClassifier,
 )
-from tests.fixtures import (
-    BERT_BASE,
-    PATH_EXAMPLE_DATA_TEXT,
-    PATH_EXAMPLE_DATA_TOKEN,
-    SBERT_MODEL_NAME,
-)
+from tests.conftest import BERT_BASE, PATH_EXAMPLE_DATA_TEXT, PATH_EXAMPLE_DATA_TOKEN
 
 # Sequence Tagger
 
@@ -80,8 +75,8 @@ def lightgbm_tfidf_text_classifier_fixture():
 
 
 @pytest.fixture
-def lightgbm_sbert_text_classifier_fixture():
-    return LgbmTextClassifier(CachedSentenceTransformer(SBERT_MODEL_NAME))
+def lightgbm_sbert_text_classifier_fixture(sentence_embedder_fixture):
+    return LgbmTextClassifier(sentence_embedder_fixture)
 
 
 @pytest.fixture
@@ -90,8 +85,8 @@ def maxent_tfidf_text_classifier_fixture():
 
 
 @pytest.fixture
-def maxent_sbert_text_classifier_fixture():
-    return MaxEntTextClassifier(CachedSentenceTransformer(SBERT_MODEL_NAME), max_iter=100)
+def maxent_sbert_text_classifier_fixture(sentence_embedder_fixture):
+    return MaxEntTextClassifier(sentence_embedder_fixture, max_iter=100)
 
 
 @pytest.fixture
