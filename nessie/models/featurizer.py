@@ -113,7 +113,7 @@ class FlairTokenEmbeddingsWrapper:
         assert embedded.shape == (num_instances, self._embedder.embedding_length)
 
         if flat:
-            return embedded
+            return np.asarray(embedded)
         else:
             return ak.unflatten(embedded, counts)
 
