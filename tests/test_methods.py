@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import awkward as ak
 import numpy as np
 import pytest
@@ -22,8 +24,10 @@ from nessie.detectors import (
     MeanDistance,
     PredictionMargin,
     Retag,
+    VariationNGrams,
 )
 from nessie.detectors.knn_entropy import KnnEntropy
+from nessie.detectors.variational_principle import VariationNGramsSpan
 from nessie.models.featurizer import (
     CachedSentenceTransformer,
     FlairTokenEmbeddingsWrapper,
@@ -114,6 +118,16 @@ def retag_fixture() -> Retag():
     return Retag()
 
 
+@pytest.fixture
+def variation_ngrams_fixture() -> VariationNGrams():
+    return VariationNGrams()
+
+
+@pytest.fixture
+def variation_ngrams_span_fixture() -> VariationNGramsSpan():
+    return VariationNGramsSpan()
+
+
 # Smoke tests
 
 
@@ -181,6 +195,7 @@ def test_detectors_for_text_classification(
         "mean_distance_fixture",
         "prediction_margin_fixture",
         "retag_fixture",
+        "variation_ngrams_fixture",
     ],
 )
 def test_detectors_for_token_classification_flat(
@@ -202,7 +217,9 @@ def test_detectors_for_token_classification_flat(
 
     params = {
         "texts": ak.flatten(ds.sentences),
+        "sentences": ds.sentences,
         "labels": ak.flatten(ds.noisy_labels),
+        "tags": ds.noisy_labels,
         "probabilities": probabilities_flat,
         "predictions": ensemble_predictions[0],
         "repeated_probabilities": repeated_probabilities_flat,
@@ -229,6 +246,7 @@ def test_detectors_for_token_classification_flat(
         "mean_distance_fixture",
         "prediction_margin_fixture",
         "retag_fixture",
+        "variation_ngrams_span_fixture",
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request: FixtureRequest):
@@ -344,3 +362,109 @@ def test_ensemble():
     flags = list(detector.score(labels, ensemble_predictions))
 
     assert flags == expected_flags
+
+
+@pytest.mark.parametrize(
+    "X,y,expected",
+    [
+        [
+            (
+                ["I", "love", "cats", "very", "much", "."],
+                ["I", "cherish", "cats", "very", "much", "."],
+                ["The", "cats", "I", "like", "are", "very", "much", "different", "in", "their", "appearance", "."],
+            ),
+            (
+                ["PRON", "VERB", "NOUN", "ADV", "ADV", "."],
+                ["PRON", "VERB", "NOUN", "ADV", "ADV", "."],
+                ["DET", "NOUN", "PRON", "VERB", "VERB", "ADV", "ADJ", "ADJ", "PREP", "PRON", "NOUN", "."],
+            ),
+            (
+                [False, False, False, False, False, False],
+                [False, False, False, False, False, False],
+                [False, False, False, False, False, False, True, False, False, False, False, False],
+            ),
+        ]
+    ],
+)
+def test_variation_principle(X: List[List[str]], y: List[List[str]], expected: List[List[bool]]):
+    detector = VariationNGrams()
+
+    scores = detector.score(X, y)
+
+    assert len(expected) == len(scores)
+
+    for e, s in zip(expected, scores):
+        assert list(e) == list(s)
+
+
+@pytest.mark.parametrize(
+    "haystack,needle,expected",
+    [
+        (["I", "love", "cats", "very", "much", "."], ["very", "much"], [(3, 5)]),
+        ([0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5], [1, 2, 3], [(1, 4), (7, 10)]),
+        ([1, 2, 3], [1, 2, 3], [(0, 3)]),
+    ],
+)
+def test_variation_principle_find_sublists(haystack: List, needle: List, expected: Tuple[int, int]):
+    matches = list(VariationNGrams._find_sublist_indices_in_list(haystack, needle))
+
+    assert len(matches) == len(expected)
+    for match, e in zip(matches, expected):
+        assert e == match
+
+
+@pytest.mark.parametrize(
+    "X,y,k,corrected,flags",
+    [
+        (
+            [
+                ["from", "my", "bank", "account", "to", "her"],
+                ["from", "my", "bank", "account", "to", "him"],
+                ["with", "my", "bank", "account", "to", "provide"],
+                ["use", "my", "bank", "account", "to", "send"],
+                ["out", "of", "my", "bank", "account", "to", "my"],
+            ],
+            [
+                ["O", "O", "B-SOURCE", "I-SOURCE", "O", "O"],
+                ["O", "O", "B-TARGET", "I-TARGET", "O", "O"],
+                ["O", "O", "B-SOURCE", "I-SOURCE", "O", "O"],
+                ["O", "O", "B-SOURCE", "I-SOURCE", "O", "O"],
+                ["O", "O", "O", "B-TARGET", "I-TARGET", "O", "O"],
+            ],
+            1,
+            [["SOURCE"], ["SOURCE"], ["SOURCE"], ["SOURCE"], ["SOURCE"]],
+            [[False], [True], [False], [False], [True]],
+        ),
+        (
+            [
+                ["Obama", "is", "an", "alumni", "of", "Harvard"],
+                ["Harvard", "is", "a", "university"],
+                ["Harvard", "is", "in", "Boston"],
+                ["Obama", "is", "a", "former", "president"],
+                ["Obama", "is", "a", "law", "scholar"],
+                ["Harvard", "is", "a", "good", "university"],
+            ],
+            [
+                ["B-PER", "O", "O", "O", "O", "B-LOC"],
+                ["B-LOC", "O", "O", "O"],
+                ["B-MISC", "O", "O", "B-LOC"],
+                ["B-ORG", "O", "O", "O", "O"],
+                ["B-PER", "O", "O", "O", "O"],
+                ["B-LOC", "O", "O", "O", "O"],
+            ],
+            1,
+            [["PER", "LOC"], ["LOC"], ["LOC", "LOC"], ["PER"], ["PER"], ["LOC"]],
+            [[False, False], [False], [True, False], [True], [False], [False]],
+        ),
+    ],
+)
+def test_variation_principle_span(
+    X: List[List[str]], y: List[List[str]], k: int, corrected: List[List[str]], flags: List[List[bool]]
+):
+    detector = VariationNGramsSpan(k=k)
+
+    actual_flags = detector.score(X, y).to_list()
+    actual_corrected = detector.correct(X, y).to_list()
+
+    assert actual_corrected == corrected
+    assert actual_flags == flags

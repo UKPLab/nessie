@@ -20,8 +20,5 @@ from nessie.detectors.maxent_reduced_ensemble import MaxEntProjectionEnsemble
 from nessie.detectors.mean_distance import MeanDistance
 from nessie.detectors.prediction_margin import PredictionMargin
 from nessie.detectors.retag import Retag
-from nessie.detectors.variational_principle import (
-    VariationPrinciple,
-    VariationPrincipleSpan,
-)
+from nessie.detectors.variational_principle import VariationNGrams, VariationNGramsSpan
 from nessie.detectors.weighted_discrepancy import WeightedDiscrepancy
