@@ -21,6 +21,7 @@ from nessie.detectors import (
     MajorityVotingEnsemble,
     MeanDistance,
     PredictionMargin,
+    Retag,
 )
 from nessie.detectors.knn_entropy import KnnEntropy
 from nessie.models.featurizer import (
@@ -108,6 +109,11 @@ def prediction_margin_fixture() -> PredictionMargin():
     return PredictionMargin()
 
 
+@pytest.fixture
+def retag_fixture() -> Retag():
+    return Retag()
+
+
 # Smoke tests
 
 
@@ -125,6 +131,7 @@ def prediction_margin_fixture() -> PredictionMargin():
         "label_aggregation_fixture",
         "mean_distance_fixture",
         "prediction_margin_fixture",
+        "retag_fixture",
     ],
 )
 def test_detectors_for_text_classification(
@@ -148,6 +155,7 @@ def test_detectors_for_text_classification(
         "texts": ds.texts,
         "labels": ds.noisy_labels,
         "probabilities": probabilities,
+        "predictions": ensemble_predictions[0],
         "repeated_probabilities": repeated_probabilities,
         "ensemble_predictions": ensemble_predictions,
         "embedded_instances": np.asarray(embedded_sentences),
@@ -172,6 +180,7 @@ def test_detectors_for_text_classification(
         "label_entropy_fixture",
         "mean_distance_fixture",
         "prediction_margin_fixture",
+        "retag_fixture",
     ],
 )
 def test_detectors_for_token_classification_flat(
@@ -195,6 +204,7 @@ def test_detectors_for_token_classification_flat(
         "texts": ak.flatten(ds.sentences),
         "labels": ak.flatten(ds.noisy_labels),
         "probabilities": probabilities_flat,
+        "predictions": ensemble_predictions[0],
         "repeated_probabilities": repeated_probabilities_flat,
         "ensemble_predictions": ensemble_predictions,
         "embedded_instances": np.asarray(embedded_tokens),
@@ -218,6 +228,7 @@ def test_detectors_for_token_classification_flat(
         "label_aggregation_fixture",
         "mean_distance_fixture",
         "prediction_margin_fixture",
+        "retag_fixture",
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request: FixtureRequest):
