@@ -15,6 +15,7 @@ from nessie.detectors import (
     DropoutUncertainty,
     ItemResponseTheoryFlagger,
     LabelAggregation,
+    LabelEntropy,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
     MajorityVotingEnsemble,
@@ -90,6 +91,11 @@ def label_aggregation_fixture() -> LabelAggregation():
     return LabelAggregation()
 
 
+@pytest.fixture
+def label_entropy_fixture() -> LabelEntropy():
+    return LabelEntropy()
+
+
 # Smoke tests
 
 
@@ -105,6 +111,7 @@ def label_aggregation_fixture() -> LabelAggregation():
         "irt_fixture",
         "knn_entropy_fixture",
         "label_aggregation_fixture",
+        "label_entropy_fixture",
     ],
 )
 def test_detectors_for_text_classification(
@@ -149,6 +156,7 @@ def test_detectors_for_text_classification(
         "irt_fixture",
         "knn_entropy_fixture",
         "label_aggregation_fixture",
+        "label_entropy_fixture",
     ],
 )
 def test_detectors_for_token_classification_flat(
