@@ -2,7 +2,10 @@ from abc import ABC
 from enum import Enum, auto
 
 import numpy as np
+import numpy.typing as npt
 from sklearn.preprocessing import LabelEncoder
+
+from nessie.types import FloatArray2D, StringArray
 
 
 class DetectorType(Enum):
@@ -72,12 +75,12 @@ class Detector:
 class ModelBasedDetector(Detector, ABC):
     def score(
         self,
-        texts: np.ndarray,
-        labels: np.ndarray,
-        predictions: np.ndarray,
-        probabilities: np.ndarray,
-        repeated_probabilities: np.ndarray,
-        confidences_over_time: np.ndarray,
+        texts: StringArray,
+        labels: StringArray,
+        predictions: StringArray,
+        probabilities: FloatArray2D,
+        repeated_probabilities: FloatArray2D,
+        confidences_over_time: npt.NDArray[float],
         le: LabelEncoder,
         **kwargs
     ) -> np.ndarray:
