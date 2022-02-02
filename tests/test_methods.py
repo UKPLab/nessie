@@ -19,6 +19,7 @@ from nessie.detectors import (
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
     MajorityVotingEnsemble,
+    MeanDistance,
 )
 from nessie.detectors.knn_entropy import KnnEntropy
 from nessie.models.featurizer import (
@@ -96,6 +97,11 @@ def label_entropy_fixture() -> LabelEntropy():
     return LabelEntropy()
 
 
+@pytest.fixture
+def mean_distance_fixture() -> MeanDistance():
+    return MeanDistance()
+
+
 # Smoke tests
 
 
@@ -111,7 +117,7 @@ def label_entropy_fixture() -> LabelEntropy():
         "irt_fixture",
         "knn_entropy_fixture",
         "label_aggregation_fixture",
-        "label_entropy_fixture",
+        "mean_distance_fixture",
     ],
 )
 def test_detectors_for_text_classification(
@@ -157,6 +163,7 @@ def test_detectors_for_text_classification(
         "knn_entropy_fixture",
         "label_aggregation_fixture",
         "label_entropy_fixture",
+        "mean_distance_fixture",
     ],
 )
 def test_detectors_for_token_classification_flat(
@@ -201,6 +208,7 @@ def test_detectors_for_token_classification_flat(
         "irt_fixture",
         "knn_entropy_fixture",
         "label_aggregation_fixture",
+        "mean_distance_fixture",
     ],
 )
 def test_detectors_for_span_labeling_flat(detector_fixture, request: FixtureRequest):
