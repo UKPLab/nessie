@@ -13,6 +13,20 @@ from nessie.dataloader import SequenceLabelingDataset, TextClassificationDataset
 from nessie.models.featurizer import (
     CachedSentenceTransformer,
     FlairTokenEmbeddingsWrapper,
+    TfIdfSentenceEmbedder,
+)
+from nessie.models.tagging import (
+    CrfSequenceTagger,
+    FlairSequenceTagger,
+    MaxEntSequenceTagger,
+    TransformerSequenceTagger,
+)
+from nessie.models.text import (
+    FastTextTextClassifier,
+    FlairTextClassifier,
+    LgbmTextClassifier,
+    MaxEntTextClassifier,
+    TransformerTextClassifier,
 )
 from nessie.noise import flipped_label_noise
 from nessie.util import RANDOM_STATE
@@ -30,6 +44,73 @@ PATH_EXAMPLE_DATA_SPAN: Path = PATH_EXAMPLE_DATA / "easy_span.conll"
 
 BERT_BASE = "google/bert_uncased_L-2_H-128_A-2"
 SBERT_MODEL_NAME = "all-MiniLM-L6-v2"
+BATCH_SIZE = 32
+
+
+# Sequence Tagger
+
+
+@pytest.fixture
+def crf_sequence_tagger_fixture():
+    return CrfSequenceTagger()
+
+
+@pytest.fixture
+def flair_sequence_tagger_fixture():
+    max_epochs = 1
+    batch_size = 32
+    return FlairSequenceTagger(max_epochs=max_epochs, batch_size=batch_size)
+
+
+@pytest.fixture
+def maxent_sequence_tagger_fixture():
+    return MaxEntSequenceTagger(max_iter=100)
+
+
+@pytest.fixture
+def transformer_sequence_tagger_fixture():
+    max_epochs = 2
+    return TransformerSequenceTagger(max_epochs=max_epochs, batch_size=BATCH_SIZE, model_name=BERT_BASE)
+
+
+# Text classifier
+
+
+@pytest.fixture
+def fasttext_text_classifier_fixture():
+    return FastTextTextClassifier()
+
+
+@pytest.fixture
+def flair_text_classifier_fixture():
+    max_epochs = 2
+    return FlairTextClassifier(max_epochs=max_epochs, batch_size=BATCH_SIZE)
+
+
+@pytest.fixture
+def lightgbm_tfidf_text_classifier_fixture():
+    return LgbmTextClassifier(TfIdfSentenceEmbedder())
+
+
+@pytest.fixture
+def lightgbm_sbert_text_classifier_fixture(sentence_embedder_fixture):
+    return LgbmTextClassifier(sentence_embedder_fixture)
+
+
+@pytest.fixture
+def maxent_tfidf_text_classifier_fixture():
+    return MaxEntTextClassifier(TfIdfSentenceEmbedder(), max_iter=100)
+
+
+@pytest.fixture
+def maxent_sbert_text_classifier_fixture(sentence_embedder_fixture):
+    return MaxEntTextClassifier(sentence_embedder_fixture, max_iter=100)
+
+
+@pytest.fixture
+def transformer_text_classifier_fixture():
+    max_epochs = 2
+    return TransformerTextClassifier(max_epochs=max_epochs, batch_size=BATCH_SIZE, model_name=BERT_BASE)
 
 
 # Embedder

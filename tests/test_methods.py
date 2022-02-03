@@ -14,6 +14,7 @@ from nessie.detectors import (
     ClassificationUncertainty,
     ConfidentLearning,
     CurriculumSpotter,
+    DataMapConfidence,
     Detector,
     DropoutUncertainty,
     ItemResponseTheoryFlagger,
@@ -43,7 +44,7 @@ from tests.conftest import (
     get_random_repeated_probabilities,
 )
 
-NUM_INSTANCES = 100
+NUM_INSTANCES = 32
 NUM_LABELS = 4
 NUM_MODELS = 3
 T = 10
@@ -78,7 +79,17 @@ def confident_learning_fixture() -> ConfidentLearning:
 
 @pytest.fixture
 def curriculum_spotter_fixture() -> CurriculumSpotter:
-    return CurriculumSpotter(max_epochs=3)
+    return CurriculumSpotter(max_epochs=2)
+
+
+@pytest.fixture
+def datamap_confidence_text_fixture(transformer_text_classifier_fixture) -> DataMapConfidence:
+    return DataMapConfidence(transformer_text_classifier_fixture)
+
+
+@pytest.fixture
+def datamap_confidence_sequence_fixture(transformer_sequence_tagger_fixture) -> DataMapConfidence:
+    return DataMapConfidence(transformer_sequence_tagger_fixture, needs_flattening=True)
 
 
 @pytest.fixture
@@ -113,7 +124,7 @@ def label_entropy_fixture() -> LabelEntropy():
 
 @pytest.fixture
 def leitner_spotter_fixture() -> LeitnerSpotter:
-    return LeitnerSpotter(max_epochs=3)
+    return LeitnerSpotter(max_epochs=2)
 
 
 @pytest.fixture
@@ -157,6 +168,7 @@ def weighted_discrepancy_fixture() -> WeightedDiscrepancy():
         "classification_uncertainty_fixture",
         "confident_learning_fixture",
         "curriculum_spotter_fixture",
+        "datamap_confidence_text_fixture",
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
@@ -179,16 +191,19 @@ def test_detectors_for_text_classification(
     repeated_probabilities = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
 
-    embedded_sentences = request.config.cache.get("methods/text/embedded_sentences", None)
+    embedded_sentences_key = f"methods/text/embedded_sentences#{NUM_INSTANCES}"
+    embedded_sentences = request.config.cache.get(embedded_sentences_key, None)
     if embedded_sentences is None:
         embedded_sentences = sentence_embedder_fixture.embed(ds.texts)
-        request.config.cache.set("methods/text/embedded_sentences", embedded_sentences.tolist())
+        request.config.cache.set(embedded_sentences_key, embedded_sentences.tolist())
 
     le = LabelEncoder().fit(ds.noisy_labels)
 
     params = {
         "texts": ds.texts,
+        "X": ds.texts,
         "labels": ds.noisy_labels,
+        "y": ds.noisy_labels,
         "probabilities": probabilities,
         "predictions": ensemble_predictions[0],
         "repeated_probabilities": repeated_probabilities,
@@ -207,6 +222,7 @@ def test_detectors_for_text_classification(
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
         "confident_learning_fixture",
+        "datamap_confidence_sequence_fixture",
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
@@ -230,18 +246,21 @@ def test_detectors_for_token_classification_flat(
     repeated_probabilities_flat = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
 
-    embedded_tokens = request.config.cache.get("methods/token/embedded_tokens", None)
+    embedded_tokens_key = f"methods/token/embedded_tokens#{NUM_INSTANCES}"
+    embedded_tokens = request.config.cache.get(embedded_tokens_key, None)
     if embedded_tokens is None:
         embedded_tokens = token_embedder_fixture.embed(ds.sentences, flat=True)
-        request.config.cache.set("methods/token/embedded_tokens", embedded_tokens.tolist())
+        request.config.cache.set(embedded_tokens_key, embedded_tokens.tolist())
 
     le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
 
     params = {
         "texts": ak.flatten(ds.sentences),
         "sentences": ds.sentences,
+        "X": ds.sentences,
         "labels": ak.flatten(ds.noisy_labels),
         "tags": ds.noisy_labels,
+        "y": ds.noisy_labels,
         "probabilities": probabilities_flat,
         "predictions": ensemble_predictions[0],
         "repeated_probabilities": repeated_probabilities_flat,

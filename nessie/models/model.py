@@ -88,3 +88,7 @@ class SequenceTagger(Model, ABC):
 class Callbackable(ABC):
     def add_callback(self, name: str, callback: TrainerCallback):
         raise NotImplementedError()
+
+
+class CallbackableModel(Model, Callbackable, ABC):
+    pass
