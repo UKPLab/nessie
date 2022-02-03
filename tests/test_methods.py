@@ -24,6 +24,7 @@ from nessie.detectors import (
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
     MajorityVotingEnsemble,
+    MaxEntProjectionEnsemble,
     MeanDistance,
     PredictionMargin,
     Retag,
@@ -137,6 +138,11 @@ def prediction_margin_fixture() -> PredictionMargin():
     return PredictionMargin()
 
 
+@pytest.fixture()
+def projection_ensemble_fixture() -> MaxEntProjectionEnsemble:
+    return MaxEntProjectionEnsemble(n_components=[32, 64], seeds=[42], max_iter=100)
+
+
 @pytest.fixture
 def retag_fixture() -> Retag():
     return Retag()
@@ -177,6 +183,7 @@ def weighted_discrepancy_fixture() -> WeightedDiscrepancy():
         "leitner_spotter_fixture",
         "mean_distance_fixture",
         "prediction_margin_fixture",
+        "projection_ensemble_fixture",
         "retag_fixture",
         "weighted_discrepancy_fixture",
     ],
@@ -197,7 +204,9 @@ def test_detectors_for_text_classification(
         embedded_sentences = sentence_embedder_fixture.embed(ds.texts)
         request.config.cache.set(embedded_sentences_key, embedded_sentences.tolist())
 
-    le = LabelEncoder().fit(ds.noisy_labels)
+    embedded_sentences = np.asarray(embedded_sentences)
+
+    le: LabelEncoder = LabelEncoder().fit(ds.noisy_labels)
 
     params = {
         "texts": ds.texts,
@@ -209,6 +218,10 @@ def test_detectors_for_text_classification(
         "repeated_probabilities": repeated_probabilities,
         "ensemble_predictions": ensemble_predictions,
         "embedded_instances": np.asarray(embedded_sentences),
+        "X_train_embedded": embedded_sentences,
+        "X_eval_embedded": embedded_sentences,
+        "y_train_encoded": le.transform(ds.noisy_labels),
+        "y_eval_encoded": le.transform(ds.noisy_labels),
         "le": le,
     }
 
@@ -231,6 +244,7 @@ def test_detectors_for_text_classification(
         "label_entropy_fixture",
         "mean_distance_fixture",
         "prediction_margin_fixture",
+        "projection_ensemble_fixture",
         "retag_fixture",
         "variation_ngrams_fixture",
         "weighted_discrepancy_fixture",
@@ -245,6 +259,7 @@ def test_detectors_for_token_classification_flat(
     probabilities_flat = get_random_probabilities(ds.num_instances, len(ds.tagset_noisy))
     repeated_probabilities_flat = get_random_repeated_probabilities(ds.num_instances, len(ds.tagset_noisy), T)
     ensemble_predictions = get_random_ensemble_predictions(ds.num_instances, ds.tagset_noisy, NUM_MODELS)
+    noisy_labels_flat = ak.flatten(ds.noisy_labels)
 
     embedded_tokens_key = f"methods/token/embedded_tokens#{NUM_INSTANCES}"
     embedded_tokens = request.config.cache.get(embedded_tokens_key, None)
@@ -252,13 +267,15 @@ def test_detectors_for_token_classification_flat(
         embedded_tokens = token_embedder_fixture.embed(ds.sentences, flat=True)
         request.config.cache.set(embedded_tokens_key, embedded_tokens.tolist())
 
-    le = LabelEncoder().fit(ak.flatten(ds.noisy_labels))
+    embedded_tokens = np.asarray(embedded_tokens)
+
+    le = LabelEncoder().fit(noisy_labels_flat)
 
     params = {
         "texts": ak.flatten(ds.sentences),
         "sentences": ds.sentences,
         "X": ds.sentences,
-        "labels": ak.flatten(ds.noisy_labels),
+        "labels": noisy_labels_flat,
         "tags": ds.noisy_labels,
         "y": ds.noisy_labels,
         "probabilities": probabilities_flat,
@@ -266,6 +283,10 @@ def test_detectors_for_token_classification_flat(
         "repeated_probabilities": repeated_probabilities_flat,
         "ensemble_predictions": ensemble_predictions,
         "embedded_instances": np.asarray(embedded_tokens),
+        "X_train_embedded": embedded_tokens,
+        "X_eval_embedded": embedded_tokens,
+        "y_train_encoded": le.transform(noisy_labels_flat),
+        "y_eval_encoded": le.transform(noisy_labels_flat),
         "le": le,
     }
 

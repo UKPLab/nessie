@@ -16,9 +16,9 @@ from nessie.detectors.knn_entropy import KnnEntropy, KnnFlagger
 from nessie.detectors.label_aggregation import LabelAggregation
 from nessie.detectors.label_entropy import LabelEntropy
 from nessie.detectors.leitner_spotter import LeitnerSpotter
-from nessie.detectors.maxent_reduced_ensemble import MaxEntProjectionEnsemble
 from nessie.detectors.mean_distance import MeanDistance
 from nessie.detectors.prediction_margin import PredictionMargin
+from nessie.detectors.projection_ensemble import MaxEntProjectionEnsemble
 from nessie.detectors.retag import Retag
 from nessie.detectors.variational_principle import VariationNGrams, VariationNGramsSpan
 from nessie.detectors.weighted_discrepancy import WeightedDiscrepancy
