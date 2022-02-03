@@ -13,11 +13,13 @@ from nessie.detectors import (
     ClassificationEntropy,
     ClassificationUncertainty,
     ConfidentLearning,
+    CurriculumSpotter,
     Detector,
     DropoutUncertainty,
     ItemResponseTheoryFlagger,
     LabelAggregation,
     LabelEntropy,
+    LeitnerSpotter,
     MajorityLabelBaseline,
     MajorityLabelPerSurfaceFormBaseline,
     MajorityVotingEnsemble,
@@ -75,6 +77,11 @@ def confident_learning_fixture() -> ConfidentLearning:
 
 
 @pytest.fixture
+def curriculum_spotter_fixture() -> CurriculumSpotter:
+    return CurriculumSpotter(max_epochs=3)
+
+
+@pytest.fixture
 def dropout_uncertainty_fixture() -> DropoutUncertainty:
     return DropoutUncertainty()
 
@@ -102,6 +109,11 @@ def label_aggregation_fixture() -> LabelAggregation():
 @pytest.fixture
 def label_entropy_fixture() -> LabelEntropy():
     return LabelEntropy()
+
+
+@pytest.fixture
+def leitner_spotter_fixture() -> LeitnerSpotter:
+    return LeitnerSpotter(max_epochs=3)
 
 
 @pytest.fixture
@@ -144,11 +156,13 @@ def weighted_discrepancy_fixture() -> WeightedDiscrepancy():
         "classification_entropy_fixture",
         "classification_uncertainty_fixture",
         "confident_learning_fixture",
+        "curriculum_spotter_fixture",
         "dropout_uncertainty_fixture",
         "ensemble_fixture",
         "irt_fixture",
         "knn_entropy_fixture",
         "label_aggregation_fixture",
+        "leitner_spotter_fixture",
         "mean_distance_fixture",
         "prediction_margin_fixture",
         "retag_fixture",
