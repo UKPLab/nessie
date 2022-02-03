@@ -11,7 +11,7 @@ from nessie.types import StringArray
 class WeightedDiscrepancy(Detector):
     """Inconsistency detection in semantic annotation
     Nora Hollenstein, Nathan Schneider, Bonnie Webber
-    LREC 2016
+    In: Proceedings of LREC 2016
     """
 
     def score(self, texts: StringArray, labels: StringArray, **kwargs) -> npt.NDArray[float]:
