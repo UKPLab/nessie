@@ -25,6 +25,7 @@ from nessie.detectors import (
     PredictionMargin,
     Retag,
     VariationNGrams,
+    WeightedDiscrepancy,
 )
 from nessie.detectors.knn_entropy import KnnEntropy
 from nessie.detectors.variational_principle import VariationNGramsSpan
@@ -128,6 +129,11 @@ def variation_ngrams_span_fixture() -> VariationNGramsSpan():
     return VariationNGramsSpan()
 
 
+@pytest.fixture
+def weighted_discrepancy_fixture() -> WeightedDiscrepancy():
+    return WeightedDiscrepancy()
+
+
 # Smoke tests
 
 
@@ -146,6 +152,7 @@ def variation_ngrams_span_fixture() -> VariationNGramsSpan():
         "mean_distance_fixture",
         "prediction_margin_fixture",
         "retag_fixture",
+        "weighted_discrepancy_fixture",
     ],
 )
 def test_detectors_for_text_classification(
@@ -196,6 +203,7 @@ def test_detectors_for_text_classification(
         "prediction_margin_fixture",
         "retag_fixture",
         "variation_ngrams_fixture",
+        "weighted_discrepancy_fixture",
     ],
 )
 def test_detectors_for_token_classification_flat(
