@@ -19,31 +19,31 @@ We implement a wide range of annotation error detection methods. These are divid
 estimate how likely it is that an instance is wrong.
 
 ### Flagger
-| **Abbreviation** | **Method**           | **Text**   | **Token**  | **Span**   | **Proposed by**                                            |
-|------------------|----------------------|------------|------------|------------|------------------------------------------------------------|
-| CL               | Confident Learning   | ✓          | ✓          | ✓          | Northcutt (2021)                                           | 
-| CS               | Curriculum Spotter   | ·          | ·          | ✓          | Amiri (2018)                                               |
-| DE               | Diverse Ensemble     | ✓          | ✓          | ✓          | Loftsson (2009)                                            |
-| IRT              | Item Response Theory | ·          | ·          | ✓          | Rodriguez (2021)                                           | 
-| LA               | Label Aggregation    | ✓          | ✓          | ✓          | Amiri (2018)                                               |
-| LS               | Leitner Spotter      | ·          | ·          | ✓          | Amiri (2018)                                               |
-| PE               | Projection Ensemble  | ✓          | ✓          | ✓          | Reiss (2020)                                               |
-| RE               | Retag                | ✓          | ✓          | ✓          | van Halteren (2000)                                        |    
-| VN               | Variation n-Grams    | ✓          | ✓          | ·          | Dickinson (2003)                                           | 
+| **Abbreviation** | **Method**           | **Text** | **Token** | **Span** | **Proposed by**                                            |
+|------------------|----------------------|----------|-----------|----------|------------------------------------------------------------|
+| CL               | Confident Learning   | ✓        | ✓         | ✓        | Northcutt (2021)                                           | 
+| CS               | Curriculum Spotter   | ✓        |           |          | Amiri (2018)                                               |
+| DE               | Diverse Ensemble     | ✓        | ✓         | ✓        | Loftsson (2009)                                            |
+| IRT              | Item Response Theory | ✓        | ✓         | ✓        | Rodriguez (2021)                                           | 
+| LA               | Label Aggregation    | ✓        | ✓         | ✓        | Amiri (2018)                                               |
+| LS               | Leitner Spotter      | ✓        |           |          | Amiri (2018)                                               |
+| PE               | Projection Ensemble  | ✓        | ✓         | ✓        | Reiss (2020)                                               |
+| RE               | Retag                | ✓        | ✓         | ✓        | van Halteren (2000)                                        |    
+| VN               | Variation n-Grams    |          | ✓         | ✓        | Dickinson (2003)                                           | 
 
 ### Scorer
 
-| **Abbreviation** | **Method**                 | **Text**   | **Token**  | **Span**   | **Proposed by**                                            |
-|------------------|----------------------------|------------|------------|------------|------------------------------------------------------------|
-| BC               | Borda Count                | ✓          | ✓          | ✓          | Larson (2020)                                              | 
-| CU               | Classification Uncertainty | ✓          | ✓          | ✓          | Hendrycks (2017)                                           | 
-| DM               | Data Map Confidence        | ·          | ·          | ✓          | Swayamdipta (2020)                                         |   
-| DU               | Dropout Uncertainty        | ✓          | ✓          | ✓          | Amiri (2018)                                               |
-| KNN              | k-Nearest Neighbor Entropy | ✓          | ✓          | ✓          | Grivas (2020)                                              |
-| LE               | Label Entropy              | ✓          | ✓          | ·          | Hollenstein (2016)                                         |   
-| MD               | Mean Distance              | ·          | ·          | ✓          | Larson (2019)                                              |
-| PM               | Prediction Margin          | ✓          | ✓          | ✓          | Dligach (2011)                                             | 
-| WD               | Weighted Discrepancy       | ✓          | ✓          | ·          | Hollenstein (2016)                                         |   rer
+| **Abbreviation** | **Method**                 | **Text** | **Token** | **Span** | **Proposed by**                                            |
+|------------------|----------------------------|----------|-----------|----------|------------------------------------------------------------|
+| BC               | Borda Count                | ✓        | ✓         | ✓        | Larson (2020)                                              | 
+| CU               | Classification Uncertainty | ✓        | ✓         | ✓        | Hendrycks (2017)                                           | 
+| DM               | Data Map Confidence        | ✓        |           |          | Swayamdipta (2020)                                         |   
+| DU               | Dropout Uncertainty        | ✓        | ✓         | ✓        | Amiri (2018)                                               |
+| KNN              | k-Nearest Neighbor Entropy | ✓        | ✓         | ✓        | Grivas (2020)                                              |
+| LE               | Label Entropy              |          | ✓         | ✓        | Hollenstein (2016)                                         |   
+| MD               | Mean Distance              | ✓        | ✓         | ✓        | Larson (2019)                                              |
+| PM               | Prediction Margin          | ✓        | ✓         | ✓        | Dligach (2011)                                             | 
+| WD               | Weighted Discrepancy       |          | ✓         | ✓        | Hollenstein (2016)                                         |   rer
 
 ## Models 
 
