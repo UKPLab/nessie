@@ -74,8 +74,11 @@ class CurriculumSpotterDataset(Dataset):
     def __getitem__(self, idx: int):
         new_idx = self._mapping[idx]
 
-        item = {key: torch.tensor(val[new_idx], dtype=torch.int64) for key, val in self._tokenized_texts.items()}
-        item["labels"] = torch.tensor(self._encoded_labels[new_idx], dtype=torch.int64)
+        item = {
+            key: torch.as_tensor(val[new_idx], dtype=torch.int64).clone().detach()
+            for key, val in self._tokenized_texts.items()
+        }
+        item["labels"] = torch.as_tensor(self._encoded_labels[new_idx], dtype=torch.int64).clone().detach()
         return item
 
     def __len__(self):
@@ -103,7 +106,7 @@ class CurriculumSpotterDataset(Dataset):
 
     @property
     def y(self):
-        return torch.tensor(self._encoded_labels, dtype=torch.int64)
+        return torch.as_tensor(self._encoded_labels, dtype=torch.int64).clone().detach()
 
     @property
     def true_len(self):

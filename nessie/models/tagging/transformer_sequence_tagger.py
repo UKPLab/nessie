@@ -160,7 +160,7 @@ class TransformerSequenceTagger(SequenceTagger, Callbackable):
                 aligned_indices = self._align_token_indices(tokenizer, tokenized_stuff)
 
                 pt_inputs = {
-                    k: torch.tensor(v).detach().to(self._device())
+                    k: torch.as_tensor(v).clone().detach().to(self._device())
                     for k, v in tokenized_stuff.items()
                     if k != "offset_mapping"
                 }

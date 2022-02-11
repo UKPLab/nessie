@@ -186,7 +186,7 @@ class TransformerTextClassifier(TextClassifier, Callbackable):
             for X_batch in more_itertools.chunked(X, 64):
                 tokenized_texts = self._tokenizer(X_batch, return_tensors="pt", truncation=True, padding=True)
                 # pt_inputs = {k: torch.tensor(v).to(self._device()) for k, v in tokenized_texts.items()}
-                pt_inputs = {k: torch.tensor(v).detach().to(self._device()) for k, v in tokenized_texts.items()}
+                pt_inputs = {k: torch.as_tensor(v).detach().to(self._device()) for k, v in tokenized_texts.items()}
 
                 output = self._model(**pt_inputs)
 
@@ -225,8 +225,11 @@ class TextClassificationDataset(Dataset):
         self.encoded_labels = encoded_labels
 
     def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx], dtype=torch.int64) for key, val in self.tokenized_texts.items()}
-        item["labels"] = torch.tensor(self.encoded_labels[idx], dtype=torch.int64)
+        item = {
+            key: torch.as_tensor(val[idx], dtype=torch.int64).clone().detach()
+            for key, val in self.tokenized_texts.items()
+        }
+        item["labels"] = torch.as_tensor(self.encoded_labels[idx], dtype=torch.int64).clone().detach()
         return item
 
     def __len__(self):

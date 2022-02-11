@@ -167,7 +167,7 @@ def generate_random_pos_tagging_dataset(num_instances: int, num_labels: int) -> 
         ["The", "cats", "I", "like", "are", "very", "much", "different", "in", "their", "appearance", "."],
     ]
 
-    sentences = ak.Array(rng.choice(possible_sentences, num_instances))
+    sentences = ak.Array(rng.choice(np.asarray(possible_sentences, dtype=object), num_instances))
     counts = ak.num(sentences)
 
     gold_labels_encoded_flat = rng.integers(0, num_labels, (ak.sum(counts),))
