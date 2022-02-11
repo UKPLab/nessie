@@ -71,6 +71,9 @@ class Detector:
     def correct(self, *args, **kwargs):
         assert self.supports_correction()
 
+    def name(self) -> str:
+        return self.__class__.__name__
+
 
 class ModelBasedDetector(Detector, ABC):
     def score(

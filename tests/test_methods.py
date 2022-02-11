@@ -38,17 +38,16 @@ from nessie.models.featurizer import (
     FlairTokenEmbeddingsWrapper,
 )
 from tests.conftest import (
+    NUM_INSTANCES,
+    NUM_LABELS,
+    NUM_MODELS,
+    T,
     generate_random_pos_tagging_dataset,
     generate_random_text_classification_dataset,
     get_random_ensemble_predictions,
     get_random_probabilities,
     get_random_repeated_probabilities,
 )
-
-NUM_INSTANCES = 32
-NUM_LABELS = 4
-NUM_MODELS = 3
-T = 10
 
 # Method fixtures
 

@@ -38,6 +38,10 @@ class TextClassificationDataset:
     def num_instances(self) -> int:
         return len(self.texts)
 
+    @property
+    def num_labels(self) -> int:
+        return len(self.tagset_noisy)
+
     def subset(self, n: int) -> "TextClassificationDataset":
         if n > self.num_instances:
             raise IndexError(f"Dataset only contains [{self.num_instances}] instances, but asked were [{n}")

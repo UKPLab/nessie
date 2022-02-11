@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Set
+from typing import Optional, Set
 
 import awkward as ak
 import numpy as np
@@ -7,9 +7,10 @@ import numpy.typing as npt
 import pytest
 from flair.embeddings import TransformerWordEmbeddings
 from numpy.random import default_rng
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import LabelEncoder, normalize
 
 from nessie.dataloader import SequenceLabelingDataset, TextClassificationDataset
+from nessie.models import TextClassifier
 from nessie.models.featurizer import (
     CachedSentenceTransformer,
     FlairTokenEmbeddingsWrapper,
@@ -29,16 +30,23 @@ from nessie.models.text import (
     TransformerTextClassifier,
 )
 from nessie.noise import flipped_label_noise
+from nessie.types import StringArray
 from nessie.util import RANDOM_STATE
 
 PATH_ROOT: Path = Path(__file__).resolve().parents[1]
+
+# Default params
+
+NUM_INSTANCES = 32
+NUM_LABELS = 4
+NUM_MODELS = 3
+T = 10
 
 # Example data
 PATH_EXAMPLE_DATA: Path = PATH_ROOT / "example_data"
 PATH_EXAMPLE_DATA_TEXT: Path = PATH_EXAMPLE_DATA / "easy_text.tsv"
 PATH_EXAMPLE_DATA_TOKEN: Path = PATH_EXAMPLE_DATA / "easy_token.conll"
 PATH_EXAMPLE_DATA_SPAN: Path = PATH_EXAMPLE_DATA / "easy_span.conll"
-
 
 # Constants
 
@@ -206,3 +214,34 @@ def get_random_ensemble_predictions(num_instances: int, tagset: Set[str], num_mo
     labels = np.vectorize(f)(encoded_labels)
 
     return labels
+
+
+# Dummy Model
+
+
+class DummyTextClassifier(TextClassifier):
+    def __init__(self):
+        self._le: Optional[LabelEncoder] = None
+
+    def fit(self, X: StringArray, y: StringArray):
+        self._le = LabelEncoder().fit(y)
+
+    def predict(self, X: StringArray) -> npt.NDArray[str]:
+        probas = self.predict_proba(X)
+        indices = np.argmax(probas, axis=1)
+        return self._le.inverse_transform(indices)
+
+    def score(self, X: StringArray) -> npt.NDArray[float]:
+        raise NotImplementedError()
+
+    def predict_proba(self, X: StringArray) -> npt.NDArray[float]:
+        return get_random_probabilities(len(X), len(self._le.classes_), seed=None)
+
+    def label_encoder(self) -> LabelEncoder:
+        return self._le
+
+    def has_dropout(self) -> bool:
+        return True
+
+    def use_dropout(self, is_activated: bool):
+        pass
