@@ -1,4 +1,4 @@
-from nessie.evaluation import CrossValidationHelper
+from nessie.helper import CrossValidationHelper
 from tests.conftest import (
     DummySequenceTagger,
     DummyTextClassifier,
