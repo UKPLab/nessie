@@ -88,6 +88,10 @@ class SequenceLabelingDataset:
     def num_instances(self) -> int:
         return len(ak.flatten(self.noisy_labels))
 
+    @property
+    def num_labels(self) -> int:
+        return len(self.tagset_noisy)
+
     def subset(self, n: int) -> "SequenceLabelingDataset":
         if n > self.num_sentences:
             raise IndexError(f"Dataset only contains [{self.num_sentences}] sentences, but asked were [{n}")
