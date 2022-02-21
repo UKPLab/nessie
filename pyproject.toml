@@ -30,6 +30,7 @@ crowd-kit = "^0.0.9"
 iobes = "^1.5.1"
 suffix-tree = "^0.0.7"
 awkward = "^1.7.0"
+pytrec-eval-terrier = "^0.5.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
