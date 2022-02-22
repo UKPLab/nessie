@@ -1,9 +1,8 @@
 import logging
-import typing
 import warnings
 from dataclasses import dataclass
 from timeit import default_timer as timer
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import awkward as ak
 import numpy as np
@@ -18,8 +17,6 @@ from nessie.util import RANDOM_STATE, set_my_seed
 
 logger = logging.getLogger("nessie")
 
-T = typing.TypeVar("T")
-
 
 @dataclass
 class Result:
@@ -29,6 +26,66 @@ class Result:
         npt.NDArray[float]
     ]  # 2D array of shape (num_instances, num_repetitions, num_classes)
     le: LabelEncoder
+
+
+@dataclass
+class State:
+    num_samples: int = None
+    num_labels: int = None
+    num_repetitions: int = None
+    should_compute_repeated_probabilities: bool = None
+    eval_indices: npt.NDArray[int] = None
+    probas_eval: npt.NDArray[float] = None  # 2D array of shape (num_instances, num_classes)
+    labels_eval: npt.NDArray[int] = None  # 1D array of shape (num_instances, )
+    repeated_probabilities: npt.NDArray[float] = None  # 2D array of shape (num_instances, num_repetitions, num_classes)
+
+
+class Callback:
+    def on_begin(self, state: State):
+        pass
+
+    def on_before_fitting(self, state: State):
+        pass
+
+    def on_after_fitting(self, state: State):
+        pass
+
+    def on_before_predicting(self, state: State):
+        pass
+
+    def on_after_predicting(self, state: State):
+        pass
+
+
+class CallbackList(Callback):
+    def __init__(self):
+        self._callbacks: List[Callback] = []
+
+    def add_callback(self, cb: Callback):
+        self._callbacks.append(cb)
+
+    def add_callbacks(self, cb: List[Callback]):
+        self._callbacks.extend(cb)
+
+    def on_begin(self, state: State):
+        for cb in self._callbacks:
+            cb.on_begin(state)
+
+    def on_before_fitting(self, state: State):
+        for cb in self._callbacks:
+            cb.on_before_fitting(state)
+
+    def on_after_fitting(self, state: State):
+        for cb in self._callbacks:
+            cb.on_after_fitting(state)
+
+    def on_before_predicting(self, state: State):
+        for cb in self._callbacks:
+            cb.on_before_predicting(state)
+
+    def on_after_predicting(self, state: State):
+        for cb in self._callbacks:
+            cb.on_after_predicting(state)
 
 
 class CrossValidationHelper:
@@ -45,6 +102,8 @@ class CrossValidationHelper:
 
         self._n_splits = n_splits
         self._num_repetitions = num_repetitions
+
+        self._callbacks: CallbackList = CallbackList()
 
     def run(self, X: StringArray, y_noisy: StringArray, model: Model) -> Result:
         """Uses cross-validation to obtain predictions and probabilities from the given model on the given data.
@@ -81,6 +140,14 @@ class CrossValidationHelper:
 
         kf = get_cross_validator(self._n_splits)
 
+        state = State()
+        state.num_samples = num_samples
+        state.num_labels = num_labels
+        state.should_compute_repeated_probabilities = should_compute_repeated_probabilities
+        state.num_repetitions = self._num_repetitions
+
+        self._callbacks.on_begin(state)
+
         for i, (train_indices, eval_indices) in enumerate(kf.split(X, y_noisy)):
             logger.info(f"Model: [{model.name}], Fold {i + 1}/{self._n_splits}")
 
@@ -91,6 +158,10 @@ class CrossValidationHelper:
             assert len(X_eval) == len(y_eval)
             assert len(eval_indices) == len(y_eval)
 
+            state.eval_indices = eval_indices
+
+            # Fit
+            self._callbacks.on_before_fitting(state)
             logger.info(f"Fitting model: [{model.name()}]")
             start_time = timer()
             model.fit(X_train.tolist(), y_train.tolist())
@@ -98,7 +169,11 @@ class CrossValidationHelper:
             training_time = end_time - start_time
             logger.info(f"Done fitting: [{model.name()}] in {training_time:.2f} seconds")
 
+            state.labels_eval = model.label_encoder().transform(y_eval)
+            self._callbacks.on_after_fitting(state)
+
             # Predict
+            self._callbacks.on_before_predicting(state)
             logger.info(f"Predicting: [{model.name()}]")
             pred_eval = model.predict(X_eval)
             probas_eval = model.predict_proba(X_eval)
@@ -116,11 +191,15 @@ class CrossValidationHelper:
                 logger.info("Obtaining multiple predictions")
                 repeated_probas = obtain_repeated_probabilities_flat(model, X_eval, self._num_repetitions)
                 repeated_probabilities[eval_indices] = repeated_probas
+                state.repeated_probabilities = repeated_probas
             else:
                 logger.info("Will not obtain multiple predictions")
 
             predictions[eval_indices] = pred_eval
             probabilities[eval_indices] = probas_eval
+
+            state.probas_eval = probas_eval
+            self._callbacks.on_after_predicting(state)
 
         return Result(
             predictions=predictions,
@@ -221,6 +300,9 @@ class CrossValidationHelper:
             repeated_probabilities=repeated_probabilities_flat,
             le=model.label_encoder(),
         )
+
+    def add_callback(self, cb: Callback):
+        self._callbacks.add_callback(cb)
 
 
 class SingeSplitCV:
