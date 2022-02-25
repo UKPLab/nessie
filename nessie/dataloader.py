@@ -1,12 +1,13 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Set
+from typing import Set, Union
 
 import awkward as ak
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import pooch
 
 
 @dataclass
@@ -103,14 +104,14 @@ class SequenceLabelingDataset:
         )
 
 
-def load_text_classification_tsv(path: Path) -> TextClassificationDataset:
+def load_text_classification_tsv(path: Union[str, Path]) -> TextClassificationDataset:
     df = pd.read_csv(path, sep="\t", names=["texts", "gold", "noisy"])
     result = TextClassificationDataset(texts=df["texts"], gold_labels=df["gold"], noisy_labels=df["noisy"])
     return result
 
 
-def load_sequence_labeling_dataset(path: Path) -> SequenceLabelingDataset:
-    with path.open() as f:
+def load_sequence_labeling_dataset(path: Union[str, Path]) -> SequenceLabelingDataset:
+    with open(path) as f:
         data = f.read().strip()
 
     sentences = []
@@ -135,3 +136,30 @@ def load_sequence_labeling_dataset(path: Path) -> SequenceLabelingDataset:
     dataset = SequenceLabelingDataset(sentences=sentences, gold_labels=gold_labels, noisy_labels=noisy_labels)
 
     return dataset
+
+
+# Example datasets
+
+
+def load_example_text_classification_data() -> TextClassificationDataset:
+    path = pooch.retrieve(
+        url="https://raw.githubusercontent.com/jcklie/nessie/main/example_data/easy_text.tsv",
+        known_hash="md5:988084e6921115b6a099177d28df00c8",
+    )
+    return load_text_classification_tsv(path)
+
+
+def load_example_token_labeling_data() -> SequenceLabelingDataset:
+    path = pooch.retrieve(
+        url="https://raw.githubusercontent.com/jcklie/nessie/main/example_data/easy_token.conll",
+        known_hash="md5:241adb8b7cde7c3a3ecbc88ad95bb582",
+    )
+    return load_sequence_labeling_dataset(path)
+
+
+def load_example_span_classification_data() -> SequenceLabelingDataset:
+    path = pooch.retrieve(
+        url="https://raw.githubusercontent.com/jcklie/nessie/main/example_data/easy_span.conll",
+        known_hash="md5:a71849f26a24365bfa1f03c1a472d5e1",
+    )
+    return load_sequence_labeling_dataset(path)

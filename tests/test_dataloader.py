@@ -1,4 +1,7 @@
 from nessie.dataloader import (
+    load_example_span_classification_data,
+    load_example_text_classification_data,
+    load_example_token_labeling_data,
     load_sequence_labeling_dataset,
     load_text_classification_tsv,
 )
@@ -28,3 +31,18 @@ def test_loading_span_labeling_dataset():
 
     assert len(ds.sentences) == len(ds.gold_labels) == len(ds.noisy_labels)
     assert len(ds.sentences) == 701
+
+
+# Example data
+
+
+def test_load_example_text_classification_data():
+    data = load_example_text_classification_data()
+
+
+def test_load_example_token_labeling_data():
+    data = load_example_token_labeling_data()
+
+
+def test_load_example_span_classification_data():
+    data = load_example_span_classification_data()
