@@ -107,6 +107,13 @@ class SequenceLabelingDataset:
             self.noisy_labels[:n],
         )
 
+    def flatten(self) -> TextClassificationDataset:
+        return TextClassificationDataset(
+            texts=ak.flatten(self.sentences).to_numpy(),
+            gold_labels=ak.flatten(self.gold_labels).to_numpy(),
+            noisy_labels=ak.flatten(self.noisy_labels).to_numpy(),
+        )
+
 
 def load_text_classification_tsv(path: Union[str, Path]) -> TextClassificationDataset:
     df = pd.read_csv(path, sep="\t", names=["texts", "gold", "noisy"])
