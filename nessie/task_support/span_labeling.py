@@ -90,7 +90,7 @@ def span_matching(
     return assignments
 
 
-def align_span_labeling_result(noisy_labels: RaggedStringArray, result: RaggedResult):
+def align_span_labeling_result(noisy_labels: RaggedStringArray, result: RaggedResult) -> AlignmentResult:
     return align_for_span_labeling(
         noisy_labels, result.predictions, result.probabilities, result.repeated_probabilities, result.le
     )
