@@ -12,7 +12,7 @@ from sklearn.model_selection import BaseCrossValidator, KFold, StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
 
 from nessie.models import Model, SequenceTagger
-from nessie.types import RaggedStringArray, StringArray, StringArray2D
+from nessie.types import IntArray, RaggedStringArray, StringArray, StringArray2D
 from nessie.util import RANDOM_STATE, set_my_seed
 
 logger = logging.getLogger("nessie")
@@ -26,6 +26,45 @@ class Result:
         npt.NDArray[float]
     ]  # 2D array of shape (num_instances, num_repetitions, num_classes)
     le: LabelEncoder
+
+    def unflatten(self, sizes: IntArray) -> "RaggedResult":
+        predictions_ragged = ak.unflatten(self.predictions.tolist(), sizes)
+        probabilities_ragged = ak.unflatten(self.probabilities, sizes)
+        repeated_probabilities_ragged = ak.unflatten(self.repeated_probabilities, sizes)
+
+        ragged_result = RaggedResult(
+            predictions=predictions_ragged,
+            probabilities=probabilities_ragged,
+            repeated_probabilities=repeated_probabilities_ragged,
+            le=self.le,
+        )
+        return ragged_result
+
+
+@dataclass
+class RaggedResult:
+    predictions: ak.Array  # ragged 3D string array of shape (num_sentences, [num_tokens, num_classes])
+    probabilities: ak.Array  # ragged 3D float array of shape (num_sentences, [num_tokens, num_classes])
+    repeated_probabilities: ak.Array  # ragged 3D float array of shape (num_sentences, [num_tokens, num_repetitions, num_classes])
+    le: LabelEncoder
+
+    def flatten(self) -> Result:
+        predictions_flat = ak.flatten(self.predictions).to_numpy()
+        probabilities_flat = ak.flatten(self.probabilities).to_numpy()
+        repeated_probabilities_flat = ak.flatten(self.repeated_probabilities).to_numpy()
+
+        result = Result(
+            predictions=predictions_flat,
+            probabilities=probabilities_flat,
+            repeated_probabilities=repeated_probabilities_flat,
+            le=self.le,
+        )
+
+        return result
+
+    @property
+    def sizes(self) -> npt.NDArray[int]:
+        return ak.num(self.predictions).to_numpy()
 
 
 @dataclass
@@ -208,7 +247,7 @@ class CrossValidationHelper:
             le=model.label_encoder(),
         )
 
-    def run_for_ragged(self, X: RaggedStringArray, y_noisy: RaggedStringArray, model: Model) -> Result:
+    def run_for_ragged(self, X: RaggedStringArray, y_noisy: RaggedStringArray, model: Model) -> RaggedResult:
         """Uses cross-validation to obtain predictions and probabilities from the given model on the given data.
         This is used for tasks with ragged inputs and outputs like sequence labeling.
 
@@ -238,7 +277,7 @@ class CrossValidationHelper:
         probabilities_flat = np.empty((num_samples, num_labels))
 
         if should_compute_repeated_probabilities:
-            repeated_probabilities_flat = np.empty((num_samples, self._num_repetitions, num_labels), dtype=object)
+            repeated_probabilities_flat = np.empty((num_samples, self._num_repetitions, num_labels))
         else:
             repeated_probabilities_flat = None
 
@@ -294,12 +333,14 @@ class CrossValidationHelper:
             predictions_flat[score_indices] = ak.flatten(pred_eval).to_numpy()
             probabilities_flat[score_indices] = ak.flatten(probas_eval).to_numpy()
 
-        return Result(
+        result = Result(
             predictions=predictions_flat,
             probabilities=probabilities_flat,
             repeated_probabilities=repeated_probabilities_flat,
             le=model.label_encoder(),
         )
+
+        return result.unflatten(sizes)
 
     def add_callback(self, cb: Callback):
         self._callbacks.add_callback(cb)

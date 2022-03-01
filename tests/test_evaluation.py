@@ -1,3 +1,6 @@
+import awkward as ak
+import numpy as np
+
 from nessie.helper import CrossValidationHelper
 from tests.conftest import (
     DummySequenceTagger,
@@ -12,7 +15,7 @@ def test_cv_helper_text_classification():
 
     model = DummyTextClassifier()
 
-    cv = CrossValidationHelper()
+    cv = CrossValidationHelper(n_splits=3)
     result = cv.run(ds.texts, ds.noisy_labels, model)
 
     assert result.predictions.shape == (ds.num_instances,)
@@ -26,10 +29,17 @@ def test_cv_helper_token_labeling():
 
     model = DummySequenceTagger()
 
-    cv = CrossValidationHelper()
+    cv = CrossValidationHelper(n_splits=3)
     result = cv.run_for_ragged(ds.sentences, ds.noisy_labels, model)
+    result_flat = result.flatten()
 
-    assert result.predictions.shape == (ds.num_instances,)
-    assert result.probabilities.shape == (ds.num_instances, ds.num_labels)
-    assert result.repeated_probabilities.shape == (ds.num_instances, cv._num_repetitions, ds.num_labels)
-    assert result.le is not None
+    # Check that the nested dimensions have the same sizes
+    assert np.all(ak.num(result.predictions, axis=1) == ds.sizes)
+    assert np.all(ak.num(result.probabilities, axis=1) == ds.sizes)
+    assert np.all(ak.num(result.repeated_probabilities, axis=1) == ds.sizes)
+
+    # Check that dimensions after flattening fit
+    assert result_flat.predictions.shape == (ds.num_instances,)
+    assert result_flat.probabilities.shape == (ds.num_instances, ds.num_labels)
+    assert result_flat.repeated_probabilities.shape == (ds.num_instances, cv._num_repetitions, ds.num_labels)
+    assert result_flat.le is not None

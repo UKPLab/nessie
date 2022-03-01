@@ -93,6 +93,10 @@ class SequenceLabelingDataset:
     def num_labels(self) -> int:
         return len(self.tagset_noisy)
 
+    @property
+    def sizes(self) -> npt.NDArray[int]:
+        return ak.num(self.sentences, axis=1).to_numpy()
+
     def subset(self, n: int) -> "SequenceLabelingDataset":
         if n > self.num_sentences:
             raise IndexError(f"Dataset only contains [{self.num_sentences}] sentences, but asked were [{n}")
