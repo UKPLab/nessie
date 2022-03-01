@@ -6,14 +6,10 @@ import numpy as np
 import numpy.typing as npt
 from scipy.optimize import linear_sum_assignment
 from seqeval.metrics.sequence_labeling import get_entities
-from sklearn.preprocessing import LabelEncoder, normalize
+from sklearn.preprocessing import LabelEncoder
 
 from nessie.helper import RaggedResult
-from nessie.types import (
-    RaggedFloatArray2D,
-    RaggedFloatArray3D,
-    RaggedStringArray,
-)
+from nessie.types import RaggedFloatArray2D, RaggedFloatArray3D, RaggedStringArray
 
 RaggedArray = npt.NDArray[Union[npt.NDArray, List[Any]]]
 
@@ -216,8 +212,7 @@ def align_for_span_labeling(
 
                 assert cur_aligned_repeated_probability.shape == (T, len(label_map))
 
-                cur_aligned_repeated_probability = normalize(cur_aligned_repeated_probability, norm="l1", axis=1)
-
+                # We do not normalize, because it resulted in worse scores downstream
                 aligned_repeated_probabilities.append(cur_aligned_repeated_probability)
 
     aligned_labels = np.asarray(aligned_labels, dtype=object)
@@ -228,8 +223,6 @@ def align_for_span_labeling(
         aligned_repeated_probabilities = np.asarray(aligned_repeated_probabilities)
 
     assert len(aligned_labels) == len(aligned_predictions) == len(aligned_probabilities) == len(aligned_span_ids)
-
-    aligned_probabilities = normalize(aligned_probabilities, norm="l1", axis=1)
 
     result = AlignmentResult(
         labels=aligned_labels,
@@ -266,7 +259,7 @@ def _build_label_map(classes: List[str]) -> Dict[str, List[int]]:
 
     for idx, cls in enumerate(classes):
         if cls == "O":
-            continue
+            label_map[cls] = [idx]
         else:
             typ = iobes.utils.extract_type(cls)
             if typ not in label_map:

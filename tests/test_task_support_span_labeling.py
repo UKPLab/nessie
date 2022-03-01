@@ -26,12 +26,9 @@ def test_aggregate_result_to_spans():
 
     result = align_for_span_labeling(noisy_labels, predictions, probabilities, repeated_probabilities, le)
 
-    expected_probabilities = normalize([[0.85, 0.1], [0.2, 0.7]], "l1")
-
     assert list(result.labels) == ["PER", "ORG"]
-    assert np.allclose(result.probabilities, expected_probabilities)
     assert result.span_ids == [SpanId(0, 0, 2), SpanId(1, 1, 2)]
-    assert len(result.le.classes_) == 2
+    assert len(result.le.classes_) == 3
 
 
 # Test span matching
