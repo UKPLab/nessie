@@ -20,6 +20,7 @@ from tests.conftest import PATH_EXAMPLE_DATA_TEXT, PATH_EXAMPLE_DATA_TOKEN
     "model_fixture",
     [
         "crf_sequence_tagger_fixture",
+        "dummy_sequence_tagger_fixture",
         "flair_sequence_tagger_fixture",
         "maxent_sequence_tagger_fixture",
         "transformer_sequence_tagger_fixture",
@@ -75,6 +76,7 @@ def test_sequence_classification_models(model_fixture: str, request):
 @pytest.mark.parametrize(
     "model_fixture",
     [
+        "dummy_text_classifier_fixture",
         "fasttext_text_classifier_fixture",
         "flair_text_classifier_fixture",
         "lightgbm_tfidf_text_classifier_fixture",

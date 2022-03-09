@@ -2,10 +2,8 @@ from netcal.scaling import LogisticCalibration
 
 from nessie.calibration import CalibrationCallback, CalibratorWrapper
 from nessie.helper import CrossValidationHelper
-from tests.conftest import (
-    DummyTextClassifier,
-    generate_random_text_classification_dataset,
-)
+from nessie.models.text import DummyTextClassifier
+from tests.conftest import generate_random_text_classification_dataset
 
 
 def test_calibration_text_classification():

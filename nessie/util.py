@@ -10,9 +10,12 @@ from typing import List
 import backoff
 import datasets
 import numpy as np
+import numpy.typing as npt
 import pandas
 import requests
 import wget as wget
+from numpy.random import default_rng
+from sklearn.preprocessing import normalize
 
 RANDOM_STATE = 42
 
@@ -112,3 +115,26 @@ def set_my_seed(seed: int):
 my_backoff = lambda: backoff.on_exception(
     backoff.expo, (requests.exceptions.RequestException, EnvironmentError), max_tries=13
 )
+
+
+def get_random_probabilities(num_instances: int, num_labels: int, seed: int = RANDOM_STATE) -> npt.NDArray[float]:
+    rng = default_rng(seed=seed)
+    probabilities = rng.random((num_instances, num_labels))
+    probabilities = normalize(probabilities, norm="l1", axis=1)
+
+    return probabilities
+
+
+def get_random_repeated_probabilities(num_instances: int, num_labels: int, T: int) -> npt.NDArray[float]:
+    result = []
+
+    for i in range(T):
+        probabilities = get_random_probabilities(num_instances, num_labels, seed=i + 1)
+        probabilities = normalize(probabilities, norm="l1", axis=1)
+        result.append(probabilities)
+
+    result = np.asarray(result).swapaxes(0, 1)
+
+    assert result.shape == (num_instances, T, num_labels)
+
+    return result

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Set
+from typing import Set
 
 import awkward as ak
 import numpy as np
@@ -7,10 +7,8 @@ import numpy.typing as npt
 import pytest
 from flair.embeddings import TransformerWordEmbeddings
 from numpy.random import default_rng
-from sklearn.preprocessing import LabelEncoder, normalize
 
 from nessie.dataloader import SequenceLabelingDataset, TextClassificationDataset
-from nessie.models import SequenceTagger, TextClassifier
 from nessie.models.featurizer import (
     CachedSentenceTransformer,
     FlairTokenEmbeddingsWrapper,
@@ -18,11 +16,13 @@ from nessie.models.featurizer import (
 )
 from nessie.models.tagging import (
     CrfSequenceTagger,
+    DummySequenceTagger,
     FlairSequenceTagger,
     MaxEntSequenceTagger,
     TransformerSequenceTagger,
 )
 from nessie.models.text import (
+    DummyTextClassifier,
     FastTextTextClassifier,
     FlairTextClassifier,
     LgbmTextClassifier,
@@ -30,7 +30,6 @@ from nessie.models.text import (
     TransformerTextClassifier,
 )
 from nessie.noise import flipped_label_noise
-from nessie.types import RaggedStringArray, StringArray
 from nessie.util import RANDOM_STATE
 
 PATH_ROOT: Path = Path(__file__).resolve().parents[1]
@@ -64,6 +63,11 @@ def crf_sequence_tagger_fixture():
 
 
 @pytest.fixture
+def dummy_sequence_tagger_fixture():
+    return DummySequenceTagger()
+
+
+@pytest.fixture
 def flair_sequence_tagger_fixture():
     max_epochs = 1
     batch_size = 32
@@ -82,6 +86,11 @@ def transformer_sequence_tagger_fixture():
 
 
 # Text classifier
+
+
+@pytest.fixture
+def dummy_text_classifier_fixture():
+    return DummyTextClassifier()
 
 
 @pytest.fixture
@@ -181,29 +190,6 @@ def generate_random_pos_tagging_dataset(num_instances: int, num_labels: int) -> 
     )
 
 
-def get_random_probabilities(num_instances: int, num_labels: int, seed: int = RANDOM_STATE) -> npt.NDArray[float]:
-    rng = default_rng(seed=seed)
-    probabilities = rng.random((num_instances, num_labels))
-    probabilities = normalize(probabilities, norm="l1", axis=1)
-
-    return probabilities
-
-
-def get_random_repeated_probabilities(num_instances: int, num_labels: int, T: int) -> npt.NDArray[float]:
-    result = []
-
-    for i in range(T):
-        probabilities = get_random_probabilities(num_instances, num_labels, seed=i + 1)
-        probabilities = normalize(probabilities, norm="l1", axis=1)
-        result.append(probabilities)
-
-    result = np.asarray(result).swapaxes(0, 1)
-
-    assert result.shape == (num_instances, T, num_labels)
-
-    return result
-
-
 def get_random_ensemble_predictions(num_instances: int, tagset: Set[str], num_models: int) -> npt.NDArray[str]:
     rng = default_rng(seed=RANDOM_STATE)
 
@@ -214,67 +200,3 @@ def get_random_ensemble_predictions(num_instances: int, tagset: Set[str], num_mo
     labels = np.vectorize(f)(encoded_labels)
 
     return labels
-
-
-# Dummy Model
-
-
-class DummyTextClassifier(TextClassifier):
-    def __init__(self):
-        self._le: Optional[LabelEncoder] = None
-
-    def fit(self, X: StringArray, y: StringArray):
-        self._le = LabelEncoder().fit(y)
-
-    def predict(self, X: StringArray) -> npt.NDArray[str]:
-        probas = self.predict_proba(X)
-        indices = np.argmax(probas, axis=1)
-        return self._le.inverse_transform(indices)
-
-    def score(self, X: StringArray) -> npt.NDArray[float]:
-        raise NotImplementedError()
-
-    def predict_proba(self, X: StringArray) -> npt.NDArray[float]:
-        return get_random_probabilities(len(X), len(self._le.classes_), seed=None)
-
-    def label_encoder(self) -> LabelEncoder:
-        return self._le
-
-    def has_dropout(self) -> bool:
-        return True
-
-    def use_dropout(self, is_activated: bool):
-        pass
-
-
-class DummySequenceTagger(SequenceTagger):
-    def __init__(self):
-        self._le: Optional[LabelEncoder] = None
-
-    def fit(self, X: RaggedStringArray, y: RaggedStringArray):
-        self._le = LabelEncoder().fit(ak.flatten(y).to_numpy())
-
-    def predict(self, X: RaggedStringArray) -> ak.Array:
-        probas = self.predict_proba(X)
-        probas_flat = ak.flatten(probas).to_numpy()
-        indices_flat = np.argmax(probas_flat, axis=1)
-        labels_flat = self._le.inverse_transform(indices_flat)
-        return ak.unflatten(labels_flat, ak.num(probas))
-
-    def score(self, X: RaggedStringArray) -> ak.Array:
-        raise NotImplementedError()
-
-    def predict_proba(self, X: RaggedStringArray) -> ak.Array:
-        counts = ak.num(ak.Array(X))
-        num_samples = ak.sum(counts)
-        probas_flat = get_random_probabilities(num_samples, len(self._le.classes_), seed=None)
-        return ak.unflatten(probas_flat, counts)
-
-    def label_encoder(self) -> LabelEncoder:
-        return self._le
-
-    def has_dropout(self) -> bool:
-        return True
-
-    def use_dropout(self, is_activated: bool):
-        pass

@@ -2,9 +2,9 @@ import awkward as ak
 import numpy as np
 
 from nessie.helper import CrossValidationHelper
+from nessie.models.tagging.dummy_sequence_classifier import DummySequenceTagger
+from nessie.models.text import DummyTextClassifier
 from tests.conftest import (
-    DummySequenceTagger,
-    DummyTextClassifier,
     generate_random_pos_tagging_dataset,
     generate_random_text_classification_dataset,
 )

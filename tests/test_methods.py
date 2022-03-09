@@ -37,6 +37,7 @@ from nessie.models.featurizer import (
     CachedSentenceTransformer,
     FlairTokenEmbeddingsWrapper,
 )
+from nessie.util import get_random_probabilities, get_random_repeated_probabilities
 from tests.conftest import (
     NUM_INSTANCES,
     NUM_LABELS,
@@ -45,8 +46,6 @@ from tests.conftest import (
     generate_random_pos_tagging_dataset,
     generate_random_text_classification_dataset,
     get_random_ensemble_predictions,
-    get_random_probabilities,
-    get_random_repeated_probabilities,
 )
 
 # Method fixtures
