@@ -76,7 +76,7 @@ def span_matching(
     overlap = lambda idx_a, idx_b: -1 * max(
         0, (min([tagging_A[idx_a][1], tagging_B[idx_b][1]]) - max([tagging_A[idx_a][0], tagging_B[idx_b][0]]))
     )
-    cost_matrix: np.ndarray = np.fromfunction(np.vectorize(overlap), (len(tagging_A), len(tagging_B)), dtype=np.int)
+    cost_matrix: np.ndarray = np.fromfunction(np.vectorize(overlap), (len(tagging_A), len(tagging_B)), dtype=int)
     a_indices, b_indices = linear_sum_assignment(cost_matrix)
 
     # throw away mappings which have no token overlap at all (i.e. costs == 0)
