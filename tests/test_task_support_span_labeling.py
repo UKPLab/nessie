@@ -4,13 +4,14 @@ from sklearn.preprocessing import LabelEncoder
 
 from nessie.dataloader import load_example_span_classification_data
 from nessie.models.featurizer import FlairTokenEmbeddingsWrapper
+from nessie.models.tagging import DummySequenceTagger
 from nessie.task_support.span_labeling import (
     SpanId,
+    aggregate_scores_to_spans,
     align_for_span_labeling,
     embed_spans,
     span_matching,
 )
-
 
 # Test alignment
 
@@ -68,9 +69,6 @@ def test_span_matching_keep_a():
     assert actual == expected
 
 
-# Embedding
-
-
 def test_embed_spans(token_embedder_fixture: FlairTokenEmbeddingsWrapper):
     n = 100
     ds = load_example_span_classification_data().subset(n)
@@ -81,3 +79,20 @@ def test_embed_spans(token_embedder_fixture: FlairTokenEmbeddingsWrapper):
 
     assert len(embedded_spans) == n
     assert len(ak.flatten(embedded_spans)) == len(entities)
+
+
+def test_aggregate_scores_to_spans(token_embedder_fixture: FlairTokenEmbeddingsWrapper):
+    n = 100
+    ds = load_example_span_classification_data().subset(n)
+
+    # This is not the best or most sensical way to obtain scores to test this, but the easiest
+    model = DummySequenceTagger()
+    model.fit(ds.sentences, ds.noisy_labels)
+    scores = model.score(ds.sentences)
+
+    scores_for_spans = aggregate_scores_to_spans(ds.noisy_labels, scores)
+
+    entities = get_entities(ds.noisy_labels.tolist())
+
+    assert len(scores_for_spans) == n
+    assert len(ak.flatten(scores_for_spans)) == len(entities)

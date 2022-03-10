@@ -11,7 +11,12 @@ from sklearn.preprocessing import LabelEncoder
 
 from nessie.helper import RaggedResult
 from nessie.models.featurizer import FlairTokenEmbeddingsWrapper
-from nessie.types import RaggedFloatArray2D, RaggedFloatArray3D, RaggedStringArray
+from nessie.types import (
+    RaggedFloatArray,
+    RaggedFloatArray2D,
+    RaggedFloatArray3D,
+    RaggedStringArray,
+)
 
 RaggedArray = npt.NDArray[Union[npt.NDArray, List[Any]]]
 
@@ -199,7 +204,7 @@ def align_for_span_labeling(
             if repeated_probabilities is not None:
                 cur_repeated_probabilities = repeated_probabilities[sentence_id]
                 cur = cur_repeated_probabilities[p_start:p_end]
-                T = cur[0].shape[0]
+                T = len(cur[0])
                 if len(cur) > 1:
                     cur_aligned_repeated_probability = span_aggregator(cur)
                 else:
@@ -303,3 +308,29 @@ def embed_spans(
         encoded_entities.append(cur)
 
     return ak.Array(encoded_entities)
+
+
+def aggregate_scores_to_spans(
+    labels: RaggedStringArray,
+    scores: RaggedFloatArray,
+    span_aggregator: Optional[Callable[[List[np.ndarray]], np.ndarray]] = None,
+) -> ak.Array:
+    if span_aggregator is None:
+        span_aggregator = lambda x: np.mean(x, axis=0)
+
+    scores_aligned = []
+
+    for labels, cur_scores in zip(list(labels), list(scores)):
+        assert len(labels) == len(cur_scores)
+
+        cur = []
+
+        for _, start, end in get_entities(list(labels)):
+            cur_score = np.asarray(cur_scores[start : end + 1])
+            if len(cur_score) > 0:
+                cur_score = span_aggregator(cur_score)
+            cur.append(cur_score)
+
+        scores_aligned.append(cur)
+
+    return ak.Array(scores_aligned)
