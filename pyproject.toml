@@ -47,6 +47,10 @@ sphinx-autodoc-typehints = "^1.17.0"
 sphinx-rtd-theme = "^1.0.0"
 sphinx-autoapi = "^1.8.4"
 nbsphinx = "^0.8.8"
+sphinx-copybutton = "^0.5.0"
+nbsphinx-link = "^1.3.0"
+nbstripout = "^0.5.0"
+pre-commit = "^2.17.0"
 
 [tool.poe.tasks]
 force-cuda113 = "python -m pip install torch==1.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html"
@@ -54,7 +58,7 @@ force-faiss-gpu = "python -m pip install faiss-gpu"
 black = "black -l 120 nessie/ tests/ scripts/"
 isort = "isort --profile black nessie/ tests/ scripts/"
 format = ["black", "isort"]
-sphinx = "sphinx-build -b html docs/source/ docs/build/html"
+sphinx = "sphinx-build -b html docs/source/ docs/build/html -j4"
 
 [tool.isort]
 profile = "black"

@@ -36,15 +36,12 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
     'm2r2',
+    'nbsphinx_link',
+    'nbsphinx',
+    'sphinx_copybutton'
 ]
 
 source_suffix = ['.rst', '.md']
-
-autoapi_type = 'python'
-autoapi_dirs = ['../../nessie']
-autoapi_add_toctree_entry = False
-autoapi_member_order = "groupwise"
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -66,6 +63,12 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# autoapi
+autoapi_type = 'python'
+autoapi_dirs = ['../../nessie']
+autoapi_add_toctree_entry = False
+autoapi_member_order = "groupwise"
 
 # Jupyter notebooks
 nbsphinx_execute = 'never'

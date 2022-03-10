@@ -5,6 +5,7 @@ Welcome to nessie's documentation!
    :hidden:
 
    self
+   methods
    api
 
 .. mdinclude:: ../../README.md
