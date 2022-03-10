@@ -30,7 +30,11 @@ class Result:
     def unflatten(self, sizes: IntArray) -> "RaggedResult":
         predictions_ragged = ak.unflatten(self.predictions.tolist(), sizes)
         probabilities_ragged = ak.unflatten(self.probabilities, sizes)
-        repeated_probabilities_ragged = ak.unflatten(self.repeated_probabilities, sizes)
+
+        if self.repeated_probabilities is not None:
+            repeated_probabilities_ragged = ak.unflatten(self.repeated_probabilities, sizes)
+        else:
+            repeated_probabilities_ragged = None
 
         ragged_result = RaggedResult(
             predictions=predictions_ragged,
@@ -51,7 +55,11 @@ class RaggedResult:
     def flatten(self) -> Result:
         predictions_flat = ak.flatten(self.predictions).to_numpy()
         probabilities_flat = ak.flatten(self.probabilities).to_numpy()
-        repeated_probabilities_flat = ak.flatten(self.repeated_probabilities).to_numpy()
+
+        if self.repeated_probabilities is not None:
+            repeated_probabilities_flat = ak.flatten(self.repeated_probabilities).to_numpy()
+        else:
+            repeated_probabilities_flat = None
 
         result = Result(
             predictions=predictions_flat,
