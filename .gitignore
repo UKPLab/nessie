@@ -159,7 +159,7 @@ vignettes/*.pdf
 .Renviron
 
 # pkgdown site
-docs/
+
 
 # translation temp files
 po/*~
@@ -174,3 +174,4 @@ po/*~
 *.xlsx
 plots/
 .ipynb_checkpoints/
+/docs/build/*

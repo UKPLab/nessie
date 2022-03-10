@@ -43,7 +43,7 @@ estimate how likely it is that an instance is wrong.
 | LE               | Label Entropy              |          | ✓         | ✓        | Hollenstein (2016)                                         |   
 | MD               | Mean Distance              | ✓        | ✓         | ✓        | Larson (2019)                                              |
 | PM               | Prediction Margin          | ✓        | ✓         | ✓        | Dligach (2011)                                             | 
-| WD               | Weighted Discrepancy       |          | ✓         | ✓        | Hollenstein (2016)                                         |   rer
+| WD               | Weighted Discrepancy       |          | ✓         | ✓        | Hollenstein (2016)                                         | 
 
 ## Models 
 

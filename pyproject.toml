@@ -40,7 +40,13 @@ poethepoet = "^0.12.2"
 black = "^22.1.0"
 isort = "^5.10.1"
 seaborn = "^0.11.2"
-jupyter = "^1.0.0"
+notebook = "^6.4.8"
+Sphinx = "^4.4.0"
+m2r2 = "^0.3.2"
+sphinx-autodoc-typehints = "^1.17.0"
+sphinx-rtd-theme = "^1.0.0"
+sphinx-autoapi = "^1.8.4"
+nbsphinx = "^0.8.8"
 
 [tool.poe.tasks]
 force-cuda113 = "python -m pip install torch==1.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html"
@@ -48,6 +54,7 @@ force-faiss-gpu = "python -m pip install faiss-gpu"
 black = "black -l 120 nessie/ tests/ scripts/"
 isort = "isort --profile black nessie/ tests/ scripts/"
 format = ["black", "isort"]
+sphinx = "sphinx-build -b html docs/source/ docs/build/html"
 
 [tool.isort]
 profile = "black"
