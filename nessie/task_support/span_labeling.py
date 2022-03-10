@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import awkward as ak
 import iobes
 import numpy as np
 import numpy.typing as npt
@@ -9,6 +10,7 @@ from seqeval.metrics.sequence_labeling import get_entities
 from sklearn.preprocessing import LabelEncoder
 
 from nessie.helper import RaggedResult
+from nessie.models.featurizer import FlairTokenEmbeddingsWrapper
 from nessie.types import RaggedFloatArray2D, RaggedFloatArray3D, RaggedStringArray
 
 RaggedArray = npt.NDArray[Union[npt.NDArray, List[Any]]]
@@ -150,8 +152,8 @@ def align_for_span_labeling(
 
     for sentence_id, (o, p) in enumerate(zip(noisy_labels, predictions)):
         assert len(o) == len(p)
-        original_entities = get_entities(o)
-        predicted_entities = get_entities(p)
+        original_entities = get_entities(list(o))
+        predicted_entities = get_entities(list(p))
 
         original_spans = [(s[1], s[2] + 1) for s in original_entities]
         predicted_spans = [(s[1], s[2] + 1) for s in predicted_entities]
@@ -268,3 +270,36 @@ def _build_label_map(classes: List[str]) -> Dict[str, List[int]]:
                 label_map[typ].append(idx)
 
     return label_map
+
+
+def embed_spans(
+    X: RaggedStringArray,
+    y: RaggedStringArray,
+    embedder: FlairTokenEmbeddingsWrapper,
+    aggregate: Callable[[List[np.ndarray]], np.ndarray] = None,
+) -> ak.Array:
+
+    if aggregate is None:
+        aggregate = lambda x: np.mean(x, axis=0)
+
+    encoded = embedder.embed(X)
+
+    assert len(y) == len(encoded)
+
+    encoded_entities = []
+
+    for tags, embeddings in zip(y, encoded):
+        assert len(tags) == len(embeddings)
+        embeddings = np.vstack(embeddings)
+        entities = get_entities(list(tags))
+
+        cur = []
+
+        for _, begin, end in entities:
+            vec = aggregate(embeddings[begin : end + 1])
+            assert len(vec) == embedder.embedding_dim
+            cur.append(vec)
+
+        encoded_entities.append(cur)
+
+    return ak.Array(encoded_entities)

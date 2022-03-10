@@ -1,11 +1,16 @@
-import numpy as np
-from sklearn.preprocessing import LabelEncoder, normalize
+import awkward as ak
+from seqeval.metrics.sequence_labeling import get_entities
+from sklearn.preprocessing import LabelEncoder
 
+from nessie.dataloader import load_example_span_classification_data
+from nessie.models.featurizer import FlairTokenEmbeddingsWrapper
 from nessie.task_support.span_labeling import (
     SpanId,
     align_for_span_labeling,
+    embed_spans,
     span_matching,
 )
+
 
 # Test alignment
 
@@ -61,3 +66,18 @@ def test_span_matching_keep_a():
 
     actual = span_matching(a, b, keep_A=True)
     assert actual == expected
+
+
+# Embedding
+
+
+def test_embed_spans(token_embedder_fixture: FlairTokenEmbeddingsWrapper):
+    n = 100
+    ds = load_example_span_classification_data().subset(n)
+
+    embedded_spans = embed_spans(ds.sentences, ds.noisy_labels, token_embedder_fixture)
+
+    entities = get_entities(ds.noisy_labels.tolist())
+
+    assert len(embedded_spans) == n
+    assert len(ak.flatten(embedded_spans)) == len(entities)
