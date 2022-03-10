@@ -173,3 +173,4 @@ po/*~
 *.Rproj
 *.xlsx
 plots/
+.ipynb_checkpoints/
