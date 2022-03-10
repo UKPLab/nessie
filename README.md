@@ -37,7 +37,7 @@ estimate how likely it is that an instance is wrong.
 |------------------|----------------------------|----------|-----------|----------|------------------------------------------------------------|
 | BC               | Borda Count                | ✓        | ✓         | ✓        | Larson (2020)                                              | 
 | CU               | Classification Uncertainty | ✓        | ✓         | ✓        | Hendrycks (2017)                                           | 
-| DM               | Data Map Confidence        | ✓        |           |          | Swayamdipta (2020)                                         |   
+| DM               | Data Map Confidence        | ✓        | ✓         | ✓        | Swayamdipta (2020)                                         |   
 | DU               | Dropout Uncertainty        | ✓        | ✓         | ✓        | Amiri (2018)                                               |
 | KNN              | k-Nearest Neighbor Entropy | ✓        | ✓         | ✓        | Grivas (2020)                                              |
 | LE               | Label Entropy              |          | ✓         | ✓        | Hollenstein (2016)                                         |   
