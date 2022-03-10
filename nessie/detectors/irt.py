@@ -39,6 +39,8 @@ class ItemResponseTheoryFlagger(Detector):
         """
 
         # https://github.com/facebookresearch/irt-leaderboard/blob/ac864bfb7145cb65353dab232f331552cc82a72f/leaderboard/irt/model_svi.py
+        ensemble_predictions = np.asarray(ensemble_predictions, dtype=object)
+        labels = np.asarray(labels, dtype=object)
 
         data = (ensemble_predictions == labels).astype(int)
         assert len(labels) == ensemble_predictions.shape[1]
