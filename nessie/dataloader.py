@@ -43,6 +43,17 @@ class TextClassificationDataset:
     def num_labels(self) -> int:
         return len(self.tagset_noisy)
 
+    @property
+    def flags(self) -> npt.NDArray[bool]:
+        """Returns an array that indicates differences between gold and noisy labels.
+
+        Returns:
+            a (num_instances,) numpy array containing `True` if gold labels disagree with noisy labels, else `False`
+        """
+        result = self.gold_labels != self.noisy_labels
+        assert len(self.gold_labels) == len(self.noisy_labels) == len(result)
+        return result
+
     def subset(self, n: int) -> "TextClassificationDataset":
         if n > self.num_instances:
             raise IndexError(f"Dataset only contains [{self.num_instances}] instances, but asked were [{n}")
