@@ -33,6 +33,7 @@ awkward = "^1.7.0"
 pytrec-eval-terrier = "^0.5.2"
 netcal = "^1.2.1"
 pooch = "^1.6.0"
+ireval = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"

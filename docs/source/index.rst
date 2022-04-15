@@ -6,6 +6,7 @@ Welcome to nessie's documentation!
 
    self
    methods
+   calibration
    api
 
 .. mdinclude:: ../../README.md
