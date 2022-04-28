@@ -9,24 +9,27 @@ from nessie.util import RANDOM_STATE
 
 
 def uniform_label_noise(dataset, p: float):
-    """For a dataset with C classes,
-    a clean example with true label y is randomly corrupted to
-    all possible classes y' with probability ρ/C
-    and stays in its  original label with probability 1 − ρ.
-     (Note the corrupted label might also happen to be the original label, hence the
-    label has probability of 1 − ρ +  ρ / C to stay uncorrupted.)"""
+    """Applies uniform noise to the given dataset.
+
+    For a dataset with `C` classes,
+    a clean example with true label `y` is randomly corrupted to
+    all possible classes `y'` with probability `ρ/C`
+    and stays in its  original label with probability `1 − ρ`.
+
+    Note the corrupted label might also happen to be the original label, hence the
+    label has probability of `1 − ρ +  ρ / C` to stay uncorrupted.
+    """
     assert 0 <= p <= 1
 
     raise NotImplementedError()
 
 
 def flipped_label_noise(labels: List[str], p: float, seed: int = RANDOM_STATE):
-    """
-     For a dataset with C classes,
-    a clean example with true label y is randomly flipped to one
-    of the rest C − 1 classes with probability ρ and stays in its
-    original label with probability 1 − ρ.
+    """Applies flipped label  noise to the given dataset.
 
+    For a dataset with `C` classes, a clean example with true label `y` is randomly flipped to one
+    of the rest `C − 1` classes with probability `ρ` and stays in its
+    original label with probability `1 − ρ`.
     """
     assert 0 <= p <= 1
 

@@ -131,6 +131,8 @@ class LeitnerSpotterTransformerTextClassifier(TransformerTextClassifier):
 
 
 class LeitnerSpotterDatasetCallback(TrainerCallback):
+    """Callback that is called during certain events (starting/ending training, ...)"""
+
     def __init__(self, model: TransformerTextClassifier, number_of_queues: int = 5):
         super().__init__()
 

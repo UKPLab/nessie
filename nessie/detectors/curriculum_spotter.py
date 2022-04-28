@@ -85,7 +85,7 @@ class CurriculumSpotterDataset(Dataset):
         return len(self._mapping)
 
     def update_mapping(self, new_dataset_mask: np.ndarray):
-        # `new_dataset` is array of bool saying whether that instance is part of the new dataset
+        # ``new_dataset`` is array of bool saying whether that instance is part of the new dataset
 
         # We build a mapping that maps instances from [0, |new_dataset|]
         # to indices in the original dataset
@@ -114,7 +114,7 @@ class CurriculumSpotterDataset(Dataset):
 
 
 class CurriculumSpotterTransformerTextClassifier(TransformerTextClassifier):
-    def _build_dataset(self, X: np.ndarray, y: np.ndarray, train: bool) -> "CurriculumSpotterDataset":
+    def _build_dataset(self, X: np.ndarray, y: np.ndarray, train: bool) -> CurriculumSpotterDataset:
         tokenized_texts = self._tokenizer(X.tolist(), truncation=True, padding=True)
 
         if train:
@@ -130,6 +130,8 @@ class CurriculumSpotterTransformerTextClassifier(TransformerTextClassifier):
 
 
 class CurriculumSpotterDatasetCallback(TrainerCallback):
+    """Callback that is called during certain events (starting/ending training, ...)"""
+
     def __init__(self, model: TransformerTextClassifier):
         super().__init__()
 

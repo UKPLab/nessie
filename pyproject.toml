@@ -57,7 +57,7 @@ force-faiss-gpu = "python -m pip install faiss-gpu"
 black = "black -l 120 nessie/ tests/ scripts/"
 isort = "isort --profile black nessie/ tests/ scripts/"
 format = ["black", "isort"]
-sphinx = "sphinx-build -b html docs/source/ docs/build/html -j4"
+sphinx = "sphinx-build -b html docs/source/ docs/build/html -j 4"
 
 [tool.isort]
 profile = "black"

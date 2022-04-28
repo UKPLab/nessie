@@ -38,7 +38,8 @@ extensions = [
     'm2r2',
     'nbsphinx_link',
     'nbsphinx',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'sphinx_rst_builder'
 ]
 
 source_suffix = ['.rst', '.md']
@@ -69,6 +70,6 @@ autoapi_type = 'python'
 autoapi_dirs = ['../../nessie']
 autoapi_add_toctree_entry = False
 autoapi_member_order = "groupwise"
-
+autoapi_options = ['members', 'undoc-members', 'show-inheritance', 'show-module-summary', 'special-members']
 # Jupyter notebooks
 nbsphinx_execute = 'never'

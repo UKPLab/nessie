@@ -71,6 +71,8 @@ class DataMapConfidence(Detector):
 
 
 class DataMapConfidenceCallback(TrainerCallback):
+    """Callback that is called during certain events (starting/ending training, ...)"""
+
     def __init__(self, model: Model, X: List[List[str]]):
         super().__init__()
 

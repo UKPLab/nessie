@@ -137,7 +137,7 @@ class CallbackList(Callback):
 
 class CrossValidationHelper:
     def __init__(self, n_splits: int = 10, num_repetitions: Optional[int] = 50):
-        """
+        """Helper class that performs `n`-fold cross validation for you.
 
         Args:
             n_splits : Number of folds to use for cross-validation. If 1, then train and test on all and the same data
@@ -371,14 +371,14 @@ def get_cross_validator(n_splits: int, stratified: bool = True) -> Union[BaseCro
 
 
 def obtain_repeated_probabilities_flat(model: Model, X: StringArray, num_repetitions: int) -> npt.NDArray[float]:
-    """
+    """Uses Monte-Carlo dropout to obtain several probability estimates per instance.
 
     Args:
-        model:
-        X:
-        num_repetitions:
+        model: The model to use
+        X: The input
+        num_repetitions: number of repetitions
 
-    Returns: A ndarray of shape (|X|, T, |classes|)
+    Returns: A ndarray of shape `(|X|, num_repetitions, |classes|)`
 
     """
     repeated_probabilities = []
@@ -416,23 +416,23 @@ def obtain_repeated_probabilities_flat(model: Model, X: StringArray, num_repetit
 
 
 def obtain_repeated_probabilities_ragged_flattened(
-    model: SequenceTagger, X: StringArray2D, T: int
+    model: SequenceTagger, X: StringArray2D, num_repetitions: int
 ) -> npt.NDArray[float]:
-    """
+    """Uses Monte-Carlo dropout to obtain several probability estimates per instance.
 
     Args:
-        model:
-        X:
-        T:
+        model: The model to use
+        X: The inputs (need to be ragged, e.g. for token labeling)
+        num_repetitions: Number of repetitions
 
-    Returns: A ndarray of shape (|X|, T, |classes|)
+    Returns: A ndarray of shape `(|X|, num_repetitions, |classes|)`
 
     """
     repeated_probabilities_flat = []
 
     saved_seed = RANDOM_STATE
     with torch.no_grad():
-        for t in range(T):
+        for t in range(num_repetitions):
             set_my_seed(t + 23)
             model.use_dropout(True)
 
@@ -444,8 +444,8 @@ def obtain_repeated_probabilities_ragged_flattened(
     set_my_seed(saved_seed)
 
     # Check whether the dropout sampling really gave us different samples
-    for idx_a in range(T):
-        for idx_b in range(T):
+    for idx_a in range(num_repetitions):
+        for idx_b in range(num_repetitions):
             if idx_a == idx_b:
                 continue
 
