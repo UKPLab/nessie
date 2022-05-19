@@ -85,7 +85,7 @@ class ModelBasedDetector(Detector, ABC):
         repeated_probabilities: FloatArray2D,
         confidences_over_time: npt.NDArray[float],
         le: LabelEncoder,
-        **kwargs
+        **kwargs,
     ) -> np.ndarray:
         """
 

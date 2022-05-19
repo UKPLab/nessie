@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.typing as npt
-from cleanlab.pruning import get_noise_indices
+from cleanlab.filter import find_label_issues
 from sklearn.preprocessing import LabelEncoder
 
 from nessie.detectors.error_detector import DetectorKind, ModelBasedDetector
@@ -53,9 +53,9 @@ class ConfidentLearning(ModelBasedDetector):
 
             temp_s = temp_le.transform(s)
 
-            scores = get_noise_indices(s=temp_s, psx=temp_probabilities)
+            scores = find_label_issues(labels=temp_s, pred_probs=temp_probabilities)
         else:
-            scores = get_noise_indices(s=s, psx=probabilities)
+            scores = find_label_issues(labels=s, pred_probs=probabilities)
 
         return scores.astype(bool)
 

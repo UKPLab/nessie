@@ -31,9 +31,9 @@ class FlairSequenceTagger(SequenceTagger):
 
     def fit(self, X: RaggedStringArray, y: RaggedStringArray):
         corpus = self._build_corpus(X, y)
-        tag_dictionary = corpus.make_label_dictionary(label_type=self.TAG_TYPE)
+        label_dictionary = corpus.make_label_dictionary(label_type=self.TAG_TYPE)
 
-        model = self._build_model(tag_dictionary)
+        model = self._build_model(label_dictionary)
         trainer = ModelTrainer(model, corpus)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -54,7 +54,15 @@ class FlairSequenceTagger(SequenceTagger):
 
         self._model.predict(sentences, verbose=self._verbose, mini_batch_size=self._batch_size * 2)
 
-        return ak.Array([[t.get_tag(self.TAG_TYPE).value for t in s] for s in sentences])
+        # https://github.com/flairNLP/flair/issues/2729
+        for sentence in sentences:
+            for entity in sentence.get_spans("ner"):
+                prefix = "B-"
+                for token in entity:
+                    token.set_label("ner-bio", prefix + entity.tag, entity.score)
+                    prefix = "I-"
+
+        return ak.Array([[t.get_label(self.TAG_TYPE).value for t in s] for s in sentences])
 
     def score(self, X: RaggedStringArray) -> ak.Array:
         assert self._model, "Model not set for predicting, train first"
@@ -63,14 +71,27 @@ class FlairSequenceTagger(SequenceTagger):
 
         self._model.predict(sentences, verbose=self._verbose, mini_batch_size=self._batch_size * 2)
 
-        return ak.Array([[t.get_tag(self.TAG_TYPE).score for t in s] for s in sentences])
+        # https://github.com/flairNLP/flair/issues/2729
+        for sentence in sentences:
+            for entity in sentence.get_spans("ner"):
+                prefix = "B-"
+                for token in entity:
+                    token.set_label("ner-bio", prefix + entity.tag, entity.score)
+                    prefix = "I-"
+
+        return ak.Array([[t.get_label(self.TAG_TYPE).score for t in s] for s in sentences])
 
     def predict_proba(self, X: RaggedStringArray) -> ak.Array:
         assert self._model, "Model not set for predicting, train first"
 
         sentences = [Sentence(list(s)) for s in X]
 
-        self._model.predict(sentences, verbose=self._verbose, all_tag_prob=True, mini_batch_size=self._batch_size * 2)
+        self._model.predict(
+            sentences,
+            verbose=self._verbose,
+            return_probabilities_for_all_classes=True,
+            mini_batch_size=self._batch_size * 2,
+        )
 
         get_score = lambda token: [label.score for label in token.get_tags_proba_dist(self.TAG_TYPE)[1:-2]]
 
@@ -89,7 +110,7 @@ class FlairSequenceTagger(SequenceTagger):
         le = LabelEncoder()
         # The [1:-2] is there to remove <unk>, <START> and <STOP> tokens
 
-        le.classes_ = np.array([label.decode("utf-8") for label in self._model.tag_dictionary.idx2item[1:-2]])
+        le.classes_ = np.array([label.decode("utf-8") for label in self._model.label_dictionary.idx2item[1:-2]])
         return le
 
     def _build_corpus(self, X: RaggedStringArray, y: RaggedStringArray) -> ColumnCorpus:
@@ -115,13 +136,13 @@ class FlairSequenceTagger(SequenceTagger):
 
         return corpus
 
-    def _build_model(self, tag_dictionary: Dictionary) -> FSequenceTagger:
+    def _build_model(self, label_dictionary: Dictionary) -> FSequenceTagger:
         embedding_types = [WordEmbeddings("glove"), BytePairEmbeddings("en")]
         embeddings = StackedEmbeddings(embeddings=embedding_types)
         return FSequenceTagger(
             hidden_size=256,
             embeddings=embeddings,
-            tag_dictionary=tag_dictionary,
+            tag_dictionary=label_dictionary,
             tag_type=self.TAG_TYPE,
             use_crf=True,
         )

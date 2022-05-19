@@ -62,15 +62,15 @@ class LabelAggregation(ModelBasedDetector):
         n, t = probs.shape
         num_items = n * t
 
-        tasks = np.repeat(np.arange(n), t).astype(object)
-        performers = np.tile(np.arange(t), n).astype(object)
-        annotator_labels = probs.flatten().astype(object)
+        tasks = np.repeat(np.arange(n), t)
+        performers = np.tile(np.arange(t), n)
+        annotator_labels = probs.flatten()
 
         assert len(tasks) == num_items
         assert len(performers) == num_items
         assert len(annotator_labels) == num_items
 
-        data = {"task": tasks, "performer": performers, "label": annotator_labels}
+        data = {"task": tasks, "worker": performers, "label": annotator_labels}
 
         df = pd.DataFrame(data)
 
