@@ -23,7 +23,7 @@ RaggedArray = npt.NDArray[Union[npt.NDArray, List[Any]]]
 UNALIGNED_LABEL = "___NESSIE_NO_ALIGNMENT___"
 
 
-# Aggregation
+# Alignment
 
 
 @dataclass
@@ -31,6 +31,23 @@ class SpanId:
     sentence: int
     start: int
     end: int
+
+
+@dataclass
+class AlignedData:
+    surface_forms: List[str]
+    gold_labels: List[str]
+    noisy_labels: List[str]
+    span_ids: List[SpanId]
+
+    def __len__(self) -> int:
+        assert len(self.surface_forms) == len(self.gold_labels) == len(self.noisy_labels) == len(self.span_ids)
+
+        return len(self.surface_forms)
+
+    @property
+    def flags(self) -> List[bool]:
+        return [g != n for g, n in zip(self.gold_labels, self.noisy_labels)]
 
 
 @dataclass
@@ -95,6 +112,77 @@ def span_matching(
         a_to_none.update(assignments)
         assignments = a_to_none
     return assignments
+
+
+def align_span_labeling_data(
+    tokens: RaggedStringArray, gold_labels: RaggedStringArray, noisy_labels: RaggedStringArray
+) -> AlignedData:
+    """Aligns spans from gold data with noisy ones.
+
+    If a span in the noisy labels has no match in gold, then  a special label is assigned that is not in the
+    original data. Surface forms returned use gold boundaries if a match exists, else from the noisy data.
+
+    Args:
+        tokens: The tokens that contain the text
+        gold_labels: Gold labels in BIO format
+        noisy_labels: Noisy labels in BIO format
+
+    Returns: The alignment between gold and noisy data
+
+    """
+
+    assert len(tokens) == len(gold_labels) == len(noisy_labels)
+
+    surface_forms_aligned = []
+    gold_labels_aligned = []
+    noisy_labels_aligned = []
+    span_ids = []
+
+    sentence_id = 0
+    for tokens, gold_labels, noisy_labels in zip(tokens, gold_labels, noisy_labels):
+        assert len(tokens) == len(gold_labels) == len(noisy_labels)
+
+        gold_entities = get_entities(list(gold_labels))
+        noisy_entities = get_entities(list(noisy_labels))
+
+        gold_spans = [(s[1], s[2] + 1) for s in gold_entities]
+        noisy_spans = [(s[1], s[2] + 1) for s in noisy_entities]
+
+        matches = span_matching(noisy_spans, gold_spans, keep_A=True)
+
+        # assert len(matches) == len(noisy_spans)
+
+        for n_idx, g_idx in matches.items():
+            n = noisy_entities[n_idx]
+            noisy_labels_aligned.append(n[0])
+
+            if g_idx is not None:
+                g = gold_entities[g_idx]
+                g_label, g_start, g_end = g
+
+                surface_form = " ".join(tokens[g[1] : g[2] + 1])
+                surface_forms_aligned.append(surface_form)
+
+                gold_labels_aligned.append(gold_entities[g_idx][0])
+            else:
+                gold_labels_aligned.append(UNALIGNED_LABEL)
+                g_start = None
+                g_end = None
+
+                surface_form = " ".join(tokens[n[1] : n[2] + 1])
+                surface_forms_aligned.append(surface_form)
+
+            span_ids.append(SpanId(sentence_id, g_start, g_end))
+
+        sentence_id += 1
+        assert len(surface_forms_aligned) == len(gold_labels_aligned) == len(noisy_labels_aligned) == len(span_ids)
+
+    return AlignedData(
+        surface_forms=surface_forms_aligned,
+        gold_labels=gold_labels_aligned,
+        noisy_labels=noisy_labels_aligned,
+        span_ids=span_ids,
+    )
 
 
 def align_span_labeling_result(noisy_labels: RaggedStringArray, result: RaggedResult) -> AlignmentResult:

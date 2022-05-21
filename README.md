@@ -81,22 +81,21 @@ You can easily add your own sklearn classifiers by subclassing `SklearnTextClass
 
 ## Development
 
-We use [poetry](https://python-poetry.org/) for dependency management and packaging.
+We use [flit](https://flit.pypa.io/en/latest/) for dependency management and packaging.
 Follow their documentation to install it. Then you can run
 
-    poetry install
+    flit install -s
 
 to download the dependencies and install in its own environment.
 In order to install your own PyTorch with CUDA, you can run
 
-    poetry shell
-    poe force-cuda113
+    make force-cuda113
 
 or install it manually in the poetry environment. You can format the code via
 
-    poe format
+    make format
 
-which should be run before every commit.
+which should be run before every commit. 
 
 ## Bibliography
 

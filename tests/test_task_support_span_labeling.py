@@ -6,14 +6,29 @@ from nessie.dataloader import load_example_span_classification_data
 from nessie.models.featurizer import FlairTokenEmbeddingsWrapper
 from nessie.models.tagging import DummySequenceTagger
 from nessie.task_support.span_labeling import (
+    UNALIGNED_LABEL,
     SpanId,
     aggregate_scores_to_spans,
     align_for_span_labeling,
+    align_span_labeling_data,
     embed_spans,
     span_matching,
 )
 
 # Test alignment
+
+
+def test_align_span_labeling_data():
+    tokens = [["Harry", "Potter", "laughs"], ["He", "moved", "to", "the", "USA"]]
+    gold_labels = [["B-PER", "I-PER", "O"], ["O", "O", "O", "O", "B-ORG"]]
+    noisy_labels = [["B-PER", "I-PER", "O"], ["B-ORG", "O", "O", "B-LOC", "I-LOC"]]
+
+    aligned_data = align_span_labeling_data(tokens, gold_labels, noisy_labels)
+
+    assert len(aligned_data) == 3
+    assert aligned_data.surface_forms == ["Harry Potter", "He", "USA"]
+    assert aligned_data.gold_labels == ["PER", UNALIGNED_LABEL, "ORG"]
+    assert aligned_data.noisy_labels == ["PER", "ORG", "LOC"]
 
 
 def test_aggregate_result_to_spans():

@@ -7,6 +7,7 @@ Welcome to nessie's documentation!
    self
    methods
    datasets
+   evaluation
    calibration
    api
 
