@@ -165,7 +165,7 @@ def load_sequence_labeling_dataset(path: Union[str, Path]) -> SequenceLabelingDa
 
 def load_example_text_classification_data() -> TextClassificationDataset:
     path = pooch.retrieve(
-        url="https://raw.githubusercontent.com/jcklie/nessie/main/example_data/easy_text.tsv",
+        url="https://raw.githubusercontent.com/UKPLab/nessie/main/example_data/easy_text.tsv",
         known_hash="md5:988084e6921115b6a099177d28df00c8",
     )
     return load_text_classification_tsv(path)
@@ -173,7 +173,7 @@ def load_example_text_classification_data() -> TextClassificationDataset:
 
 def load_example_token_labeling_data() -> SequenceLabelingDataset:
     path = pooch.retrieve(
-        url="https://raw.githubusercontent.com/jcklie/nessie/main/example_data/easy_token.conll",
+        url="https://raw.githubusercontent.com/UKPLab/nessie/main/example_data/easy_token.conll",
         known_hash="md5:241adb8b7cde7c3a3ecbc88ad95bb582",
     )
     return load_sequence_labeling_dataset(path)
@@ -181,7 +181,7 @@ def load_example_token_labeling_data() -> SequenceLabelingDataset:
 
 def load_example_span_classification_data() -> SequenceLabelingDataset:
     path = pooch.retrieve(
-        url="https://raw.githubusercontent.com/jcklie/nessie/main/example_data/easy_span.conll",
+        url="https://raw.githubusercontent.com/UKPLab/nessie/main/example_data/easy_span.conll",
         known_hash="md5:a71849f26a24365bfa1f03c1a472d5e1",
     )
     return load_sequence_labeling_dataset(path)
