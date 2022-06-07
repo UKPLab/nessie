@@ -1,6 +1,9 @@
 <img src="https://raw.githubusercontent.com/UKPLab/nessie/main/img/nessie_with_text.svg" alt="Nessie Logo">
 
 [![Documentation Status](https://readthedocs.org/projects/ukp-nessie/badge/?version=latest)](https://ukp-nessie.readthedocs.io/en/latest/?badge=latest)
+![PyPI](https://img.shields.io/pypi/v/nessie)
+![PyPI - License](https://img.shields.io/pypi/l/nessie)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 **nessie** is a package for annotation error detection. It can be used to automatically detect errors in annotated
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each

@@ -11,7 +11,7 @@ dynamic = ["version"]
 description = "Annotation error detection and correction"
 requires-python = ">=3.8"
 classifiers = ["Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
+    "OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
