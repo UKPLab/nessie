@@ -6,8 +6,10 @@
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each
 and every instance.
 
-> 💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
-> detailed explanations and code examples!**
+---
+💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
+detailed explanations and code examples!**
+---
 
 **Contact person:** Jan-Christoph Klie <br/>
 https://www.ukp.tu-darmstadt.de <br/>
@@ -15,7 +17,7 @@ https://www.tu-darmstadt.de <br/>
 
 Don't hesitate to report an issue if something is broken (and it shouldn't be) or if you have further questions.
 
-> This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication. 
+> ⚠️ **This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication.** 
 
 Please use the following citation when using our software:
 
@@ -60,8 +62,10 @@ detector = Retag()
 flags = detector.score(text_data.noisy_labels, tc_result.predictions)
 ```
 
-> 💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
-> detailed explanations and code examples!**
+---
+💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
+detailed explanations and code examples!**
+---
 
 ## Methods
 
