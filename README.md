@@ -4,13 +4,61 @@
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each
 and every instance.
 
+> 💡 **Please also refer to our additional documentation! It contains detailed explanations and code examples!**
+
+Contact person: Jan-Christoph Klie, klie@ukp.informatik.tu-darmstadt.de / git@mrklie.com
+
+https://www.ukp.tu-darmstadt.de/
+https://www.tu-darmstadt.de/
+
+Don't hesitate to send us an e-mail or report an issue, if something is broken (and it shouldn't be) or if you have further questions.
+
+> This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication. 
+
+Please use the following citation:
+
+```
+@misc{https://doi.org/10.48550/arxiv.2206.02280,
+  doi = {10.48550/ARXIV.2206.02280},  
+  url = {https://arxiv.org/abs/2206.02280},  
+  author = {Klie, Jan-Christoph and Webber, Bonnie and Gurevych, Iryna},  
+  title = {Annotation Error Detection: Analyzing the Past and Present for a More Coherent Future},  
+  publisher = {arXiv},  
+  year = {2022}
+}
+```
+
 ## Installation
 
     pip install nessie
 
 This installs the package with default dependencies and PyTorch with only CPU support.
-If you want to use your own PyTorch version, you need to install it afterwards manually. 
+If you want to use your own PyTorch version (e.g., with CUDA enabled), you need to install it afterwards manually. 
 If you need `faiss-gpu`, then you should also install that manually afterwards.
+
+## Basic Usage
+
+Given annotated data, this package can be used to find potential errors. For instance, using `Retag`, that is,
+training a model, letting it predict on your data and then flagging instances where model predictions disagree
+with the given labels can be done as:
+
+```python
+from nessie.dataloader import load_example_text_classification_data, load_example_token_labeling_data
+from nessie.helper import CrossValidationHelper
+from nessie.models.text import DummyTextClassifier
+from nessie.detectors import Retag
+
+text_data = load_example_text_classification_data().subset(100)
+
+cv = CrossValidationHelper(n_splits=10)
+tc_result = cv.run(text_data.texts, text_data.noisy_labels, DummyTextClassifier())
+
+detector = Retag()
+
+flags = detector.score(text_data.noisy_labels, tc_result.predictions)
+```
+
+> 💡 **Please also refer to our additional documentation! It contains detailed explanations and code examples!**
 
 ## Methods
 
@@ -19,6 +67,7 @@ We implement a wide range of annotation error detection methods. These are divid
 estimate how likely it is that an instance is wrong.
 
 ### Flagger
+
 | **Abbreviation** | **Method**           | **Text** | **Token** | **Span** | **Proposed by**                                            |
 |------------------|----------------------|----------|-----------|----------|------------------------------------------------------------|
 | CL               | Confident Learning   | ✓        | ✓         | ✓        | Northcutt (2021)                                           | 
