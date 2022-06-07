@@ -175,3 +175,5 @@ po/*~
 plots/
 .ipynb_checkpoints/
 /docs/build/*
+
+dist/*
