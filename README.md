@@ -6,10 +6,9 @@
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each
 and every instance.
 
----
-💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
-detailed explanations and code examples!**
----
+> 💡 **Please also refer to our** 
+> [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)
+> **! It contains detailed explanations and code examples!**
 
 **Contact person:** Jan-Christoph Klie <br/>
 https://www.ukp.tu-darmstadt.de <br/>
@@ -62,10 +61,9 @@ detector = Retag()
 flags = detector.score(text_data.noisy_labels, tc_result.predictions)
 ```
 
----
-💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
-detailed explanations and code examples!**
----
+> 💡 **Please also refer to our** 
+> [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)
+> **! It contains detailed explanations and code examples!**
 
 ## Methods
 
