@@ -4,14 +4,14 @@
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each
 and every instance.
 
-> 💡 **Please also refer to our [additional documentation(https://ukp-nessie.readthedocs.io/en/latest/)]! It contains 
+> 💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
 > detailed explanations and code examples!**
 
-Contact person: Jan-Christoph Klie
-https://www.ukp.tu-darmstadt.de/
-https://www.tu-darmstadt.de/
+**Contact person:** Jan-Christoph Klie <br/>
+https://www.ukp.tu-darmstadt.de <br/>
+https://www.tu-darmstadt.de <br/>
 
-Don't hesitate to send us an e-mail or report an issue, if something is broken (and it shouldn't be) or if you have further questions.
+Don't hesitate to report an issue if something is broken (and it shouldn't be) or if you have further questions.
 
 > This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication. 
 
