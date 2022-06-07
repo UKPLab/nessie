@@ -1,4 +1,4 @@
-<img src="img/nessie_with_text.svg" alt="Nessie Logo">
+<img src="https://raw.githubusercontent.com/UKPLab/nessie/main/img/nessie_with_text.svg" alt="Nessie Logo">
 
 **nessie** is a package for annotation error detection. It can be used to automatically detect errors in annotated
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each
@@ -6,8 +6,7 @@ and every instance.
 
 > 💡 **Please also refer to our additional documentation! It contains detailed explanations and code examples!**
 
-Contact person: Jan-Christoph Klie, klie@ukp.informatik.tu-darmstadt.de / git@mrklie.com
-
+Contact person: Jan-Christoph Klie
 https://www.ukp.tu-darmstadt.de/
 https://www.tu-darmstadt.de/
 
@@ -15,7 +14,7 @@ Don't hesitate to send us an e-mail or report an issue, if something is broken (
 
 > This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication. 
 
-Please use the following citation:
+Please use the following citation when using our software:
 
 ```
 @misc{https://doi.org/10.48550/arxiv.2206.02280,
@@ -43,7 +42,7 @@ training a model, letting it predict on your data and then flagging instances wh
 with the given labels can be done as:
 
 ```python
-from nessie.dataloader import load_example_text_classification_data, load_example_token_labeling_data
+from nessie.dataloader import load_example_text_classification_data
 from nessie.helper import CrossValidationHelper
 from nessie.models.text import DummyTextClassifier
 from nessie.detectors import Retag
