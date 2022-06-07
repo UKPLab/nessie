@@ -1,5 +1,7 @@
 <img src="https://raw.githubusercontent.com/UKPLab/nessie/main/img/nessie_with_text.svg" alt="Nessie Logo">
 
+[![Documentation Status](https://readthedocs.org/projects/ukp-nessie/badge/?version=latest)](https://ukp-nessie.readthedocs.io/en/latest/?badge=latest)
+
 **nessie** is a package for annotation error detection. It can be used to automatically detect errors in annotated
 corpora so that human annotators can concentrate on a subset to correct, instead of needing to look at each
 and every instance.
@@ -58,7 +60,7 @@ detector = Retag()
 flags = detector.score(text_data.noisy_labels, tc_result.predictions)
 ```
 
-> 💡 **Please also refer to our [additional documentation(https://ukp-nessie.readthedocs.io/en/latest/)]! It contains 
+> 💡 **Please also refer to our [additional documentation](https://ukp-nessie.readthedocs.io/en/latest/)! It contains 
 > detailed explanations and code examples!**
 
 ## Methods
