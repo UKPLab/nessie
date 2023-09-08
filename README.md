@@ -24,13 +24,17 @@ Don't hesitate to report an issue if something is broken (and it shouldn't be) o
 Please use the following citation when using our software:
 
 ```
-@misc{https://doi.org/10.48550/arxiv.2206.02280,
-  doi = {10.48550/ARXIV.2206.02280},  
-  url = {https://arxiv.org/abs/2206.02280},  
-  author = {Klie, Jan-Christoph and Webber, Bonnie and Gurevych, Iryna},  
-  title = {Annotation Error Detection: Analyzing the Past and Present for a More Coherent Future},  
-  publisher = {arXiv},  
-  year = {2022}
+@article{10.1162/coli_a_00464,
+    author = {Klie, Jan-Christoph and Webber, Bonnie and Gurevych, Iryna},
+    title = "{Annotation Error Detection: Analyzing the Past and Present for a More Coherent Future}",
+    journal = {Computational Linguistics},
+    volume = {49},
+    number = {1},
+    pages = {157-198},
+    year = {2023},
+    month = {03},
+    doi = {10.1162/coli_a_00464},
+    url = {https://doi.org/10.1162/coli\_a\_00464}
 }
 ```
 
